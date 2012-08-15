@@ -9,27 +9,46 @@ import booby
 
 
 class TestSession(testing.AsyncTestCase):
+    URL = 'http://example.com/api'
+
     def test_get_success_runs_callback_with_model(self):
-        client = FakeHTTPClient()
-        client.response = httplib.OK, escape.json_encode({
+        self.client.response = httplib.OK, escape.json_encode({
             'id': 2,
             'name': 'Jack',
             'email': 'jack@example.com'
         })
 
-        session = finch.Session('http://example.com/api', client=client)
-
-        session.get(User, 2, self.stop)
+        self.session.get(User, 2, self.stop)
         user = self.wait()
 
         self.assertEqual(user.id, 2)
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
 
+    def test_get_fetch_model_from_collection(self):
+        self.client.response = httplib.OK, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'email': 'jack@example.com'
+        })
+
+        self.session.get(User, 2, self.stop)
+        self.wait()
+
+        self.assertEqual(self.client.last_request.url, self.URL + '/users/2')
+        self.assertEqual(self.client.last_request.method, 'GET')
+
+    def setUp(self):
+        super(TestSession, self).setUp()
+
+        self.client = FakeHTTPClient()
+        self.session = finch.Session(self.URL, client=self.client)
+
 
 class FakeHTTPClient(object):
     def __init__(self):
         self._response = None
+        self._last_request = None
 
     @property
     def response(self):
@@ -39,7 +58,17 @@ class FakeHTTPClient(object):
     def response(self, value):
         self._response = FakeHTTPResponse(*value)
 
+    @property
+    def last_request(self):
+        return self._last_request
+
+    @last_request.setter
+    def last_request(self, value):
+        self._last_request = FakeHTTPRequest(*value)
+
     def fetch(self, request, callback, **kwargs):
+        self.last_request = request, kwargs.get('method', 'GET')
+
         callback(self.response)
 
 
@@ -49,9 +78,15 @@ class FakeHTTPResponse(object):
         self.body = body
 
 
+class FakeHTTPRequest(object):
+    def __init__(self, url, method):
+        self.url = url
+        self.method = method
+
+
 class User(booby.Model):
     _collection = 'users'
 
-    id = booby.IntegerField(primary=True)
+    id = booby.IntegerField()
     name = booby.StringField()
     email = booby.StringField()
