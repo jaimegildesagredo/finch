@@ -19,7 +19,8 @@ class Session(object):
             model.update(escape.json_decode(response.body))
             callback(model)
 
-        self.client.fetch(self.url(model), method='POST', callback=on_response)
+        self.client.fetch(self.url(model), method='POST',
+            body=escape.json_encode(dict(model)), callback=on_response)
 
     def url(self, model, id_=None):
         result = self.endpoint + '/' + model._collection

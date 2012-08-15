@@ -66,6 +66,8 @@ class TestSession(testing.AsyncTestCase):
 
         self.assertEqual(self.client.last_request.url, self.URL + '/users')
         self.assertEqual(self.client.last_request.method, 'POST')
+        self.assertEqual(self.client.last_request.body,
+            '{"id": null, "name": "Jack", "email": "jack@example.com"}')
 
     def setUp(self):
         super(TestSession, self).setUp()
@@ -96,7 +98,7 @@ class FakeHTTPClient(object):
         self._last_request = FakeHTTPRequest(*value)
 
     def fetch(self, request, callback, **kwargs):
-        self.last_request = request, kwargs.get('method', 'GET')
+        self.last_request = request, kwargs.get('method', 'GET'), kwargs.get('body')
 
         callback(self.response)
 
@@ -108,9 +110,10 @@ class FakeHTTPResponse(object):
 
 
 class FakeHTTPRequest(object):
-    def __init__(self, url, method):
+    def __init__(self, url, method, body):
         self.url = url
         self.method = method
+        self.body = body
 
 
 class User(booby.Resource):
