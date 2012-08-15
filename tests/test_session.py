@@ -25,6 +25,26 @@ class TestSession(testing.AsyncTestCase):
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
 
+    def test_get_model_with_parse_classmethod_on_success_calls_parse(self):
+        self.client.response = httplib.OK, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'email': 'jack@example.com',
+            'foo': 'bar'
+        })
+
+        class UserWithParseMethod(User):
+            @classmethod
+            def parse(cls, raw):
+                return cls(id=raw['id'], name=raw['name'], email=raw['email'])
+
+        self.session.get(UserWithParseMethod, 2, self.stop)
+        user = self.wait()
+
+        self.assertEqual(user.id, 2)
+        self.assertEqual(user.name, 'Jack')
+        self.assertEqual(user.email, 'jack@example.com')
+
     def test_get_fetch_model_from_collection(self):
         self.client.response = httplib.OK, escape.json_encode({
             'id': 2,

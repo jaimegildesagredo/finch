@@ -9,10 +9,15 @@ class Session(object):
         self.client = client
 
     def get(self, model, id_, callback):
-        def callback_(response):
-            callback(model(**escape.json_decode(response.body)))
+        def on_response(response):
+            if hasattr(model, 'parse'):
+                result = model.parse(escape.json_decode(response.body))
+            else:
+                result = model(**escape.json_decode(response.body))
 
-        self.client.fetch(self.url(model, id_), callback=callback_)
+            callback(result)
+
+        self.client.fetch(self.url(model, id_), callback=on_response)
 
     def url(self, model, id_):
         return self.endpoint + '/' + model._collection + '/' + str(id_)
