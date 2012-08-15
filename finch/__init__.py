@@ -10,14 +10,19 @@ class Session(object):
 
     def get(self, model, id_, callback):
         def on_response(response):
-            if hasattr(model, 'parse'):
-                result = model.parse(escape.json_decode(response.body))
-            else:
-                result = model(**escape.json_decode(response.body))
-
-            callback(result)
+            callback(model(**escape.json_decode(response.body)))
 
         self.client.fetch(self.url(model, id_), callback=on_response)
 
-    def url(self, model, id_):
-        return self.endpoint + '/' + model._collection + '/' + str(id_)
+    def add(self, model, callback):
+        def on_response(response):
+            model.update(escape.json_decode(response.body))
+            callback(model)
+
+        self.client.fetch(self.url(model), method='POST', callback=on_response)
+
+    def url(self, model, id_=None):
+        result = self.endpoint + '/' + model._collection
+        if id_ is not None:
+            result += '/' + str(id_)
+        return result

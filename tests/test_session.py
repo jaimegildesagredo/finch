@@ -25,27 +25,7 @@ class TestSession(testing.AsyncTestCase):
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
 
-    def test_get_model_with_parse_classmethod_on_success_calls_parse(self):
-        self.client.response = httplib.OK, escape.json_encode({
-            'id': 2,
-            'name': 'Jack',
-            'email': 'jack@example.com',
-            'foo': 'bar'
-        })
-
-        class UserWithParseMethod(User):
-            @classmethod
-            def parse(cls, raw):
-                return cls(id=raw['id'], name=raw['name'], email=raw['email'])
-
-        self.session.get(UserWithParseMethod, 2, self.stop)
-        user = self.wait()
-
-        self.assertEqual(user.id, 2)
-        self.assertEqual(user.name, 'Jack')
-        self.assertEqual(user.email, 'jack@example.com')
-
-    def test_get_fetch_model_from_collection(self):
+    def test_get_gets_model_from_collection(self):
         self.client.response = httplib.OK, escape.json_encode({
             'id': 2,
             'name': 'Jack',
@@ -57,6 +37,35 @@ class TestSession(testing.AsyncTestCase):
 
         self.assertEqual(self.client.last_request.url, self.URL + '/users/2')
         self.assertEqual(self.client.last_request.method, 'GET')
+
+    def test_add_success_runs_callback_with_model(self):
+        self.client.response = httplib.CREATED, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'email': 'jack@example.com'
+        })
+
+        user = User(name='Jack', email='jack@example.com')
+
+        self.session.add(user, self.stop)
+
+        self.assertEqual(user, self.wait())
+        self.assertEqual(user.id, 2)
+
+    def test_add_post_model_to_collection(self):
+        self.client.response = httplib.CREATED, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'email': 'jack@example.com'
+        })
+
+        user = User(name='Jack', email='jack@example.com')
+
+        self.session.add(user, self.stop)
+        self.wait()
+
+        self.assertEqual(self.client.last_request.url, self.URL + '/users')
+        self.assertEqual(self.client.last_request.method, 'POST')
 
     def setUp(self):
         super(TestSession, self).setUp()
@@ -104,7 +113,7 @@ class FakeHTTPRequest(object):
         self.method = method
 
 
-class User(booby.Model):
+class User(booby.Resource):
     _collection = 'users'
 
     id = booby.IntegerField()
