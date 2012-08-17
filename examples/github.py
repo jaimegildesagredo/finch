@@ -6,7 +6,7 @@ import booby
 import finch
 
 
-class Repo(booby.Model):
+class Repo(booby.Resource):
     _collection = 'repos/jaimegildesagredo'
 
     id = booby.IntegerField()
@@ -14,13 +14,13 @@ class Repo(booby.Model):
     owner = booby.StringField()
     private = booby.BoolField()
 
-    @classmethod
-    def parse(cls, raw):
-        return cls(
-            id=raw['id'],
-            name=raw['name'],
-            owner=raw['owner']['login'],
-            private=raw['private'])
+    def parse(self, raw):
+        return {
+            'id': raw['id'],
+            'name': raw['name'],
+            'owner': raw['owner']['login'],
+            'private': raw['private']
+        }
 
 
 if __name__ == '__main__':
