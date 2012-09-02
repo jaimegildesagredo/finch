@@ -6,7 +6,7 @@ import booby
 import finch
 
 
-class Repo(booby.Resource):
+class Repo(finch.Resource):
     _collection = 'repos/jaimegildesagredo'
 
     id = booby.IntegerField()
@@ -26,8 +26,11 @@ class Repo(booby.Resource):
 if __name__ == '__main__':
     session = finch.Session('https://api.github.com', httpclient.AsyncHTTPClient())
 
-    def on_repo(model):
-        print dict(model)
+    def on_repo(model, error):
+        if error is None:
+            print dict(model)
+        else:
+            print error.message
         ioloop.IOLoop.instance().stop()
 
     session.get(Repo, 'cormoran', on_repo)
