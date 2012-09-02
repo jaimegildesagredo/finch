@@ -6,6 +6,7 @@ from tornado import testing, escape
 
 import finch
 import booby
+import fake_httpclient
 
 
 class TestSession(testing.AsyncTestCase):
@@ -72,48 +73,8 @@ class TestSession(testing.AsyncTestCase):
     def setUp(self):
         super(TestSession, self).setUp()
 
-        self.client = FakeHTTPClient()
+        self.client = fake_httpclient.HTTPClient()
         self.session = finch.Session(self.URL, client=self.client)
-
-
-class FakeHTTPClient(object):
-    def __init__(self):
-        self._response = None
-        self._last_request = None
-
-    @property
-    def response(self):
-        return self._response
-
-    @response.setter
-    def response(self, value):
-        self._response = FakeHTTPResponse(*value)
-
-    @property
-    def last_request(self):
-        return self._last_request
-
-    @last_request.setter
-    def last_request(self, value):
-        self._last_request = FakeHTTPRequest(*value)
-
-    def fetch(self, request, callback, **kwargs):
-        self.last_request = request, kwargs.get('method', 'GET'), kwargs.get('body')
-
-        callback(self.response)
-
-
-class FakeHTTPResponse(object):
-    def __init__(self, code, body):
-        self.code = code
-        self.body = body
-
-
-class FakeHTTPRequest(object):
-    def __init__(self, url, method, body):
-        self.url = url
-        self.method = method
-        self.body = body
 
 
 class User(finch.Resource):
