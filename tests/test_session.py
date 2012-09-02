@@ -62,14 +62,6 @@ class TestSession(testing.AsyncTestCase):
         self.assertEqual(user, None)
 
     def test_get_with_custom_parse_method_runs_callback_with_model(self):
-        class UserWithCustomParseMethod(User):
-            def parse(self, raw):
-                return {
-                    'id': raw['id'],
-                    'name': raw['name'],
-                    'email': raw['email']
-                }
-
         self.client.response = httplib.OK, escape.json_encode({
             'id': 2,
             'name': 'Jack',
@@ -95,12 +87,17 @@ class TestSession(testing.AsyncTestCase):
             'email': 'jack@example.com'
         })
 
-        user = User(name='Jack', email='jack@example.com')
+        request_user = User(name='Jack', email='jack@example.com')
 
-        self.session.add(user, self.stop)
+        self.session.add(request_user, self.stop)
+        result = self.wait()
 
-        self.assertEqual(user, self.wait())
+        user, error = result['model'], result['error']
+
+        self.assertIs(user, request_user)
         self.assertEqual(user.id, 2)
+
+        self.assertEqual(error, None)
 
     def test_add_posts_model_to_collection(self):
         self.client.response = httplib.CREATED, escape.json_encode({
@@ -109,15 +106,55 @@ class TestSession(testing.AsyncTestCase):
             'email': 'jack@example.com'
         })
 
-        user = User(name='Jack', email='jack@example.com')
+        request_user = User(name='Jack', email='jack@example.com')
 
-        self.session.add(user, self.stop)
+        self.session.add(request_user, self.stop)
         self.wait()
 
         self.assertEqual(self.client.last_request.url, self.URL + '/users')
         self.assertEqual(self.client.last_request.method, 'POST')
         self.assertEqual(self.client.last_request.body,
             '{"id": null, "name": "Jack", "email": "jack@example.com"}')
+
+    def test_add_without_custom_parse_method_runs_callback_with_error(self):
+        self.client.response = httplib.CREATED, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'last_name': 'Sparrow',
+            'email': 'jack@example.com'
+        })
+
+        request_user = User(name='Jack', email='jack@example.com')
+
+        self.session.add(request_user, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertTrue(isinstance(error, ValueError))
+        self.assertEqual(error.message, "Invalid field 'last_name'")
+
+        self.assertEqual(user, None)
+
+    def test_add_with_custom_parse_method_runs_callback_with_model(self):
+        self.client.response = httplib.OK, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'last_name': 'Sparrow',
+            'email': 'jack@example.com'
+        })
+
+        request_user = UserWithCustomParseMethod(name='Jack', email='jack@example.com')
+
+        self.session.add(request_user, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertIs(user, request_user)
+        self.assertEqual(user.id, 2)
+
+        self.assertEqual(error, None)
 
     def setUp(self):
         super(TestSession, self).setUp()
@@ -132,3 +169,12 @@ class User(finch.Resource):
     id = booby.IntegerField()
     name = booby.StringField()
     email = booby.StringField()
+
+
+class UserWithCustomParseMethod(User):
+    def parse(self, raw):
+        return {
+            'id': raw['id'],
+            'name': raw['name'],
+            'email': raw['email']
+        }

@@ -27,8 +27,16 @@ class Session(object):
 
     def add(self, model, callback):
         def on_response(response):
-            model.update(escape.json_decode(response.body))
-            callback(model)
+            result = model
+
+            try:
+                result.update(result.parse(escape.json_decode(response.body)))
+            except ValueError as error:
+                result = None
+            else:
+                error = None
+
+            callback(model=result, error=error)
 
         self.client.fetch(self.url(model), method='POST',
             body=escape.json_encode(dict(model)), callback=on_response)
