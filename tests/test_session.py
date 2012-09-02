@@ -29,6 +29,30 @@ class TestSession(testing.AsyncTestCase):
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
 
+    def test_get_not_found_runs_callback_with_error(self):
+        self.client.response = httplib.NOT_FOUND, ''
+
+        self.session.get(User, 2, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertIsNone(user)
+        self.assertIsInstance(error, finch.SessionError)
+        self.assertEqual(error.message, httplib.responses[httplib.NOT_FOUND])
+
+    def test_get_bad_request_runs_callback_with_error(self):
+        self.client.response = httplib.BAD_REQUEST, ''
+
+        self.session.get(User, 2, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertIsNone(user)
+        self.assertIsInstance(error, finch.SessionError)
+        self.assertEqual(error.message, httplib.responses[httplib.BAD_REQUEST])
+
     def test_get_gets_model_from_collection(self):
         self.client.response = httplib.OK, escape.json_encode({
             'id': 2,

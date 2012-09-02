@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import httplib
+
 from tornado import escape
 
 import booby
@@ -12,6 +14,10 @@ class Session(object):
 
     def get(self, model, id_, callback):
         def on_response(response):
+            if response.code >= httplib.BAD_REQUEST:
+                callback(model=None, error=SessionError(httplib.responses[response.code]))
+                return
+
             result = model()
 
             try:
@@ -46,6 +52,10 @@ class Session(object):
         if id_ is not None:
             result += '/' + str(id_)
         return result
+
+
+class SessionError(Exception):
+    pass
 
 
 class Resource(booby.Model):
