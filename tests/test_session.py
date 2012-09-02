@@ -24,11 +24,10 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
+        self.assertIsNone(error)
         self.assertEqual(user.id, 2)
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
-
-        self.assertEqual(error, None)
 
     def test_get_gets_model_from_collection(self):
         self.client.response = httplib.OK, escape.json_encode({
@@ -56,10 +55,9 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
-        self.assertTrue(isinstance(error, ValueError))
+        self.assertIsNone(user)
+        self.assertIsInstance(error, ValueError)
         self.assertEqual(error.message, "Invalid field 'last_name'")
-
-        self.assertEqual(user, None)
 
     def test_get_with_custom_parse_method_runs_callback_with_model(self):
         self.client.response = httplib.OK, escape.json_encode({
@@ -74,11 +72,10 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
+        self.assertIsNone(error)
         self.assertEqual(user.id, 2)
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
-
-        self.assertEqual(error, None)
 
     def test_add_success_runs_callback_with_model(self):
         self.client.response = httplib.CREATED, escape.json_encode({
@@ -94,10 +91,9 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
+        self.assertIsNone(error)
         self.assertIs(user, request_user)
         self.assertEqual(user.id, 2)
-
-        self.assertEqual(error, None)
 
     def test_add_posts_model_to_collection(self):
         self.client.response = httplib.CREATED, escape.json_encode({
@@ -131,10 +127,9 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
-        self.assertTrue(isinstance(error, ValueError))
+        self.assertIsNone(user)
+        self.assertIsInstance(error, ValueError)
         self.assertEqual(error.message, "Invalid field 'last_name'")
-
-        self.assertEqual(user, None)
 
     def test_add_with_custom_parse_method_runs_callback_with_model(self):
         self.client.response = httplib.OK, escape.json_encode({
@@ -151,10 +146,9 @@ class TestSession(testing.AsyncTestCase):
 
         user, error = result['model'], result['error']
 
+        self.assertIsNone(error)
         self.assertIs(user, request_user)
         self.assertEqual(user.id, 2)
-
-        self.assertEqual(error, None)
 
     def setUp(self):
         super(TestSession, self).setUp()
