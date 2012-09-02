@@ -53,7 +53,7 @@ class TestSession(testing.AsyncTestCase):
         self.assertEqual(user, self.wait())
         self.assertEqual(user.id, 2)
 
-    def test_add_post_model_to_collection(self):
+    def test_add_posts_model_to_collection(self):
         self.client.response = httplib.CREATED, escape.json_encode({
             'id': 2,
             'name': 'Jack',
