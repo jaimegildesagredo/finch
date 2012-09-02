@@ -12,7 +12,16 @@ class Session(object):
 
     def get(self, model, id_, callback):
         def on_response(response):
-            callback(model(**escape.json_decode(response.body)))
+            result = model()
+
+            try:
+                result.update(result.parse(escape.json_decode(response.body)))
+            except ValueError as error:
+                result = None
+            else:
+                error = None
+            finally:
+                callback(model=result, error=error)
 
         self.client.fetch(self.url(model, id_), callback=on_response)
 
@@ -32,4 +41,5 @@ class Session(object):
 
 
 class Resource(booby.Model):
-    pass
+    def parse(self, raw):
+        return raw

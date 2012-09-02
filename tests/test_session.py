@@ -20,11 +20,15 @@ class TestSession(testing.AsyncTestCase):
         })
 
         self.session.get(User, 2, self.stop)
-        user = self.wait()
+        result = self.wait()
+
+        user, error = result['model'], result['error']
 
         self.assertEqual(user.id, 2)
         self.assertEqual(user.name, 'Jack')
         self.assertEqual(user.email, 'jack@example.com')
+
+        self.assertEqual(error, None)
 
     def test_get_gets_model_from_collection(self):
         self.client.response = httplib.OK, escape.json_encode({
@@ -38,6 +42,51 @@ class TestSession(testing.AsyncTestCase):
 
         self.assertEqual(self.client.last_request.url, self.URL + '/users/2')
         self.assertEqual(self.client.last_request.method, 'GET')
+
+    def test_get_without_custom_parse_method_runs_callback_with_error(self):
+        self.client.response = httplib.OK, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'last_name': 'Sparrow',
+            'email': 'jack@example.com'
+        })
+
+        self.session.get(User, 2, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertTrue(isinstance(error, ValueError))
+        self.assertEqual(error.message, "Invalid field 'last_name'")
+
+        self.assertEqual(user, None)
+
+    def test_get_with_custom_parse_method_runs_callback_with_model(self):
+        class UserWithCustomParseMethod(User):
+            def parse(self, raw):
+                return {
+                    'id': raw['id'],
+                    'name': raw['name'],
+                    'email': raw['email']
+                }
+
+        self.client.response = httplib.OK, escape.json_encode({
+            'id': 2,
+            'name': 'Jack',
+            'last_name': 'Sparrow',
+            'email': 'jack@example.com'
+        })
+
+        self.session.get(UserWithCustomParseMethod, 2, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertEqual(user.id, 2)
+        self.assertEqual(user.name, 'Jack')
+        self.assertEqual(user.email, 'jack@example.com')
+
+        self.assertEqual(error, None)
 
     def test_add_success_runs_callback_with_model(self):
         self.client.response = httplib.CREATED, escape.json_encode({
