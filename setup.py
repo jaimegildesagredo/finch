@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='fich',
+    name='finch',
     version='0.1',
     description='Asynchronous RESTful API consumer for Python',
     author='Jaime Gil de Sagredo Luna',
