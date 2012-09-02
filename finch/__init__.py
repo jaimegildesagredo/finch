@@ -33,6 +33,10 @@ class Session(object):
 
     def add(self, model, callback):
         def on_response(response):
+            if response.code >= httplib.BAD_REQUEST:
+                callback(model=None, error=SessionError(httplib.responses[response.code]))
+                return
+
             result = model
 
             try:

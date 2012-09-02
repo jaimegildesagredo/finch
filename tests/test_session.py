@@ -119,6 +119,20 @@ class TestSession(testing.AsyncTestCase):
         self.assertIs(user, request_user)
         self.assertEqual(user.id, 2)
 
+    def test_add_bad_request_runs_callback_with_error(self):
+        self.client.response = httplib.BAD_REQUEST, ''
+
+        request_user = User(name='Jack', email='jack@example.com')
+
+        self.session.add(request_user, self.stop)
+        result = self.wait()
+
+        user, error = result['model'], result['error']
+
+        self.assertIsNone(user)
+        self.assertIsInstance(error, finch.SessionError)
+        self.assertEqual(error.message, httplib.responses[httplib.BAD_REQUEST])
+
     def test_add_posts_model_to_collection(self):
         self.client.response = httplib.CREATED, escape.json_encode({
             'id': 2,
