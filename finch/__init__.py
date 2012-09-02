@@ -2,6 +2,8 @@
 
 from tornado import escape
 
+import booby
+
 
 class Session(object):
     def __init__(self, endpoint, client):
@@ -27,3 +29,7 @@ class Session(object):
         if id_ is not None:
             result += '/' + str(id_)
         return result
+
+
+class Resource(booby.Model):
+    pass

@@ -116,7 +116,7 @@ class FakeHTTPRequest(object):
         self.body = body
 
 
-class User(booby.Resource):
+class User(finch.Resource):
     _collection = 'users'
 
     id = booby.IntegerField()
