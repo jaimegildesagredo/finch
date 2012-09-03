@@ -12,6 +12,27 @@ class Session(object):
         self.endpoint = endpoint
         self.client = client
 
+    def all(self, model, callback):
+        def on_response(response):
+            if response.code >= httplib.BAD_REQUEST:
+                callback(collection=None, error=SessionError(httplib.responses[response.code]))
+                return
+
+            try:
+                result = []
+                for raw in escape.json_decode(response.body):
+                    r = model()
+                    r.update(r.parse(raw))
+                    result.append(r)
+            except ValueError as error:
+                result = None
+            else:
+                error = None
+            finally:
+                callback(collection=result, error=error)
+
+        self.client.fetch(self.url(model), callback=on_response)
+
     def get(self, model, id_, callback):
         def on_response(response):
             if response.code >= httplib.BAD_REQUEST:

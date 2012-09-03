@@ -12,6 +12,99 @@ import fake_httpclient
 class TestSession(testing.AsyncTestCase):
     URL = 'http://example.com/api'
 
+    def test_all_success_runs_callback_with_collection(self):
+        self.client.response = httplib.OK, escape.json_encode([
+            {
+                'id': 1,
+                'name': 'Foo',
+                'email': 'foo@example.com'
+            },
+            {
+                'id': 2,
+                'name': 'Jack',
+                'email': 'jack@example.com'
+            }
+        ])
+
+        self.session.all(User, self.stop)
+        result = self.wait()
+
+        users, error = result['collection'], result['error']
+
+        self.assertIsNone(error)
+        self.assertEqual(users[0].id, 1)
+        self.assertEqual(users[0].name, 'Foo')
+        self.assertEqual(users[0].email, 'foo@example.com')
+        self.assertEqual(users[1].id, 2)
+        self.assertEqual(users[1].name, 'Jack')
+        self.assertEqual(users[1].email, 'jack@example.com')
+
+    def test_all_not_found_runs_callback_with_error(self):
+        self.client.response = httplib.NOT_FOUND, ''
+
+        self.session.all(User, self.stop)
+        result = self.wait()
+
+        users, error = result['collection'], result['error']
+
+        self.assertIsNone(users)
+        self.assertIsInstance(error, finch.SessionError)
+        self.assertEqual(error.message, httplib.responses[httplib.NOT_FOUND])
+
+    def test_all_gets_collection(self):
+        self.client.response = httplib.OK, escape.json_encode([
+            {
+                'id': 2,
+                'name': 'Jack',
+                'email': 'jack@example.com'
+            }
+        ])
+
+        self.session.all(User, self.stop)
+        self.wait()
+
+        self.assertEqual(self.client.last_request.url, self.URL + '/users')
+        self.assertEqual(self.client.last_request.method, 'GET')
+
+    def test_all_model_without_custom_parse_method_runs_callback_with_error(self):
+        self.client.response = httplib.OK, escape.json_encode([
+            {
+                'id': 2,
+                'name': 'Jack',
+                'last_name': 'Sparrow',
+                'email': 'jack@example.com'
+            }
+        ])
+
+        self.session.all(User, self.stop)
+        result = self.wait()
+
+        users, error = result['collection'], result['error']
+
+        self.assertIsNone(users)
+        self.assertIsInstance(error, ValueError)
+        self.assertEqual(error.message, "Invalid field 'last_name'")
+
+    def test_all_model_with_custom_parse_method_runs_callback_with_collection(self):
+        self.client.response = httplib.OK, escape.json_encode([
+            {
+                'id': 2,
+                'name': 'Jack',
+                'last_name': 'Sparrow',
+                'email': 'jack@example.com'
+            }
+        ])
+
+        self.session.all(UserWithCustomParseMethod, self.stop)
+        result = self.wait()
+
+        users, error = result['collection'], result['error']
+
+        self.assertIsNone(error)
+        self.assertEqual(users[0].id, 2)
+        self.assertEqual(users[0].name, 'Jack')
+        self.assertEqual(users[0].email, 'jack@example.com')
+
     def test_get_success_runs_callback_with_model(self):
         self.client.response = httplib.OK, escape.json_encode({
             'id': 2,
