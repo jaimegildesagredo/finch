@@ -7,7 +7,7 @@ import finch
 
 
 class Repo(finch.Resource):
-    _collection = 'repos/jaimegildesagredo'
+    _collection = 'users/jaimegildesagredo/repos'
 
     id = booby.IntegerField()
     name = booby.StringField()
@@ -33,5 +33,14 @@ if __name__ == '__main__':
             print error.message
         ioloop.IOLoop.instance().stop()
 
-    session.get(Repo, 'cormoran', on_repo)
+    def on_repos(collection, error):
+        if error is None:
+            for repo in collection:
+                print dict(repo)
+        else:
+            print error.message
+        ioloop.IOLoop.instance().stop()
+
+#    session.get(Repo, 'cormoran', on_repo)
+    session.all(Repo, on_repos)
     ioloop.IOLoop.instance().start()
