@@ -2,17 +2,16 @@
 
 from tornado import httpclient, ioloop
 
-import booby
 import finch
 
 
 class Repo(finch.Resource):
     _collection = 'users/jaimegildesagredo/repos'
 
-    id = booby.IntegerField()
-    name = booby.StringField()
-    owner = booby.StringField()
-    private = booby.BoolField()
+    id = finch.IntegerField()
+    name = finch.StringField()
+    owner = finch.StringField()
+    private = finch.BoolField()
 
     def parse(self, raw):
         return {

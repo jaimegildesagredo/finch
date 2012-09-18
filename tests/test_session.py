@@ -5,7 +5,6 @@ import httplib
 from tornado import testing, escape
 
 import finch
-import booby
 import fake_httpclient
 
 
@@ -291,9 +290,9 @@ class TestSession(testing.AsyncTestCase):
 class User(finch.Resource):
     _collection = 'users'
 
-    id = booby.IntegerField()
-    name = booby.StringField()
-    email = booby.StringField()
+    id = finch.IntegerField()
+    name = finch.StringField()
+    email = finch.StringField()
 
 
 class UserWithCustomParseMethod(User):

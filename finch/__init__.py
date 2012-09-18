@@ -5,6 +5,7 @@ import httplib
 from tornado import escape
 
 import booby
+from booby import IntegerField, StringField, BoolField
 
 
 class Session(object):
@@ -86,3 +87,7 @@ class SessionError(Exception):
 class Resource(booby.Model):
     def parse(self, raw):
         return raw
+
+
+__all__ = ['Resource, Session, SessionError, IntegerField', 'StringField',
+    'BoolField']
