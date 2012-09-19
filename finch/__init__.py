@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import httplib
+import logging
 
 from tornado import escape
 
@@ -12,6 +13,7 @@ class Session(object):
     def __init__(self, endpoint, client):
         self.endpoint = endpoint
         self.client = client
+        self.logger = logging.getLogger('finch.session')
 
     def all(self, model, callback):
         def on_response(response):
@@ -32,7 +34,9 @@ class Session(object):
             finally:
                 callback(collection=result, error=error)
 
-        self.client.fetch(self.url(model), callback=on_response)
+        url = self.url(model)
+        self.client.fetch(url, callback=on_response)
+        self.logger.info('GET {0}'.format(url))
 
     def get(self, model, id_, callback):
         def on_response(response):
@@ -51,7 +55,9 @@ class Session(object):
             finally:
                 callback(model=result, error=error)
 
-        self.client.fetch(self.url(model, id_), callback=on_response)
+        url = self.url(model, id_)
+        self.client.fetch(url, callback=on_response)
+        self.logger.info('GET {0}'.format(url))
 
     def add(self, model, callback):
         def on_response(response):
@@ -70,8 +76,11 @@ class Session(object):
 
             callback(model=result, error=error)
 
-        self.client.fetch(self.url(model), method='POST',
+        url = self.url(model)
+        self.client.fetch(url, method='POST',
             body=escape.json_encode(dict(model)), callback=on_response)
+
+        self.logger.info('POST {0}'.format(url))
 
     def url(self, model, id_=None):
         result = self.endpoint + '/' + model._collection

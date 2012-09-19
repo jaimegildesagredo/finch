@@ -4,6 +4,11 @@ from tornado import httpclient, ioloop
 
 import finch
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+logging.info('foo')
+
 
 class Repo(finch.Resource):
     _collection = 'users/jaimegildesagredo/repos'
