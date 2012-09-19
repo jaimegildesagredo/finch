@@ -1,2 +1,2 @@
 tornado
--e git+https://jaimegildesagredo@bitbucket.org/jaimegildesagredo/booby.git#egg=booby
+booby
