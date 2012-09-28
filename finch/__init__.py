@@ -6,7 +6,7 @@ import logging
 from tornado import escape
 
 import booby
-from booby import IntegerField, StringField, BoolField
+from booby import EmbeddedModel, IntegerField, StringField, BoolField
 
 
 class Session(object):
@@ -98,5 +98,5 @@ class Resource(booby.Model):
         return raw
 
 
-__all__ = ['Resource, Session, SessionError, IntegerField', 'StringField',
-    'BoolField']
+__all__ = ['Resource', 'Session', 'SessionError', 'EmbeddedModel',
+    'IntegerField', 'StringField', 'BoolField']
