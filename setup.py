@@ -6,7 +6,7 @@ requirements = open('requirements.txt').read().splitlines()
 
 setup(
     name='finch',
-    version='0.1',
+    version='0.1.1',
     description='Asynchronous RESTful API consumer for Python',
     author='Jaime Gil de Sagredo Luna',
     author_email='jaimegildesagredo@gmail.com',
