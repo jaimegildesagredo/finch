@@ -92,7 +92,7 @@ class Session(object):
 
         url = self.url(model)
         self.client.fetch(url, method='POST',
-            body=escape.json_encode(dict(model)), callback=on_response)
+            body=escape.json_encode(model.to_dict()), callback=on_response)
 
         self.logger.info('POST {0}'.format(url))
 
