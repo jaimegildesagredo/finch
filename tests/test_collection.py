@@ -3,7 +3,6 @@
 import httplib
 
 from tornado import testing, escape
-from nose.tools import nottest
 from hamcrest import *
 
 from tests import fake_httpclient
