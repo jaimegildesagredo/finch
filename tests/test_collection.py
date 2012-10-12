@@ -83,7 +83,7 @@ class TestGetEntireCollection(AsyncTestCase):
         ])
 
     def test_when_collection_is_successful_fetched_then_runs_callback_with_collection(self):
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -95,7 +95,7 @@ class TestGetEntireCollection(AsyncTestCase):
         ))
 
     def test_when_collection_is_not_found_then_runs_callback_with_http_error(self):
-        self.client.response = httplib.NOT_FOUND, 'Not Found'
+        self.client.next_response = httplib.NOT_FOUND, 'Not Found'
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -107,7 +107,7 @@ class TestGetEntireCollection(AsyncTestCase):
             message=httplib.responses[httplib.NOT_FOUND]))
 
     def test_when_fetching_collection_then_client_performs_http_get(self):
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         self.wait()
@@ -133,7 +133,7 @@ class TestGetEntireCollection(AsyncTestCase):
             }
         ])
 
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -162,7 +162,7 @@ class TestGetEntireCollection(AsyncTestCase):
             }
         ])
 
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -189,7 +189,7 @@ class TestGetEntireCollection(AsyncTestCase):
             ]
         })
 
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -219,7 +219,7 @@ class TestGetEntireCollection(AsyncTestCase):
             ]
         })
 
-        self.client.response = httplib.OK, self.json_collection
+        self.client.next_response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -243,7 +243,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         })
 
     def test_when_model_is_successful_fetched_then_runs_callback_with_model(self):
-        self.client.response = httplib.OK, self.json_model
+        self.client.next_response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -252,7 +252,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_model_is_not_found_then_runs_callback_with_http_error(self):
-        self.client.response = httplib.NOT_FOUND, 'Not Found'
+        self.client.next_response = httplib.NOT_FOUND, 'Not Found'
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -264,7 +264,7 @@ class TestGetModelFromCollection(AsyncTestCase):
             message=httplib.responses[httplib.NOT_FOUND]))
 
     def test_when_fetching_model_then_client_performs_http_get(self):
-        self.client.response = httplib.OK, self.json_model
+        self.client.next_response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -282,7 +282,7 @@ class TestGetModelFromCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.response = httplib.OK, self.json_model
+        self.client.next_response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -303,7 +303,7 @@ class TestGetModelFromCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.response = httplib.OK, self.json_model
+        self.client.next_response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -326,7 +326,7 @@ class TestAddModelToCollection(AsyncTestCase):
         })
 
     def test_when_model_is_successful_created_then_runs_callback_with_model(self):
-        self.client.response = httplib.CREATED, self.json_model
+        self.client.next_response = httplib.CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -335,7 +335,7 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_bad_request_response_then_runs_callback_with_http_error(self):
-        self.client.response = httplib.BAD_REQUEST, 'Bad Request'
+        self.client.next_response = httplib.BAD_REQUEST, 'Bad Request'
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -347,7 +347,7 @@ class TestAddModelToCollection(AsyncTestCase):
             message=httplib.responses[httplib.BAD_REQUEST]))
 
     def test_when_creating_model_then_client_performs_http_post(self):
-        self.client.response = httplib.CREATED, self.json_model
+        self.client.next_response = httplib.CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -365,7 +365,7 @@ class TestAddModelToCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.response = httplib.CREATED, self.json_model
+        self.client.next_response = httplib.CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -387,7 +387,7 @@ class TestAddModelToCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.response = httplib.CREATED, self.json_model
+        self.client.next_response = httplib.CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
