@@ -186,6 +186,27 @@ class Collection(object):
 
         self.client.fetch('{0}/{1}'.format(self.url, id_), callback=on_response)
 
+    def add(self, obj, callback):
+        def on_response(response):
+            if response.code >= httplib.BAD_REQUEST:
+                callback(None, HTTPError(response.code))
+                return
+
+            raw = escape.json_decode(response.body)
+
+            try:
+                if hasattr(obj, 'parse'):
+                    obj.update(obj.parse(raw))
+                else:
+                    obj.update(raw)
+            except ValueError as error:
+                callback(None, error)
+                return
+
+            callback(obj, None)
+
+        self.client.fetch(self.url, method='POST', callback=on_response)
+
 
 class HTTPError(Exception):
     def __init__(self, code):

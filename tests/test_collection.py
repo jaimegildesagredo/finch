@@ -41,7 +41,7 @@ class User(Model):
     email = StringField()
 
 
-class UserWithParser(User):
+class UserWithParser(User): # FIXME: Rename model
     def parse(self, raw):
         return {
             'id': raw['id'],
@@ -306,6 +306,90 @@ class TestGetModelFromCollection(AsyncTestCase):
         self.client.response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
+
+
+class TestAddModelToCollection(AsyncTestCase):
+    def setup(self):
+        self.client = fake_httpclient.HTTPClient()
+        self.collection = Users(self.client)
+
+        self.user = User(name='Foo', email='foo@example.com')
+
+        self.json_model = escape.json_encode({
+            'id': 1,
+            'name': 'Foo',
+            'email': 'foo@example.com'
+        })
+
+    def test_when_model_is_successful_created_then_runs_callback_with_model(self):
+        self.client.response = httplib.CREATED, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
+
+    def test_when_bad_request_response_then_runs_callback_with_http_error(self):
+        self.client.response = httplib.BAD_REQUEST, 'Bad Request'
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not user)
+        assert_that(error, instance_of(finch.HTTPError))
+        assert_that(error, has_properties(
+            code=httplib.BAD_REQUEST,
+            message=httplib.responses[httplib.BAD_REQUEST]))
+
+    def test_when_creating_model_then_client_performs_http_post(self):
+        self.client.response = httplib.CREATED, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        last_request = self.client.last_request
+
+        assert_that(last_request.url, is_('/users'))
+        assert_that(last_request.method, is_('POST'))
+
+    def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
+        self.json_model = escape.json_encode({
+            'id': 1,
+            'name': 'Foo',
+            'email': 'foo@example.com',
+            'url': 'http://example.com/Foo'
+        })
+
+        self.client.response = httplib.CREATED, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not user)
+
+        # Exception from booby.Model
+        assert_that(error, instance_of(ValueError))
+        assert_that(error.message, "Invalid field 'url'")
+
+    def test_when_model_has_parse_method_then_runs_callback_with_model(self):
+        self.collection = UsersWithModelParse(self.client)
+        self.user = self.collection.model(**self.user.to_dict())
+
+        self.json_model = escape.json_encode({
+            'id': 1,
+            'name': 'Foo',
+            'email': 'foo@example.com',
+            'url': 'http://example.com/Foo'
+        })
+
+        self.client.response = httplib.CREATED, self.json_model
+
+        self.collection.add(self.user, self.stop)
         user, error = self.wait()
 
         assert_that(not error)
