@@ -133,6 +133,7 @@ class Collection(object):
                 callback(None, HTTPError(response.code))
                 return
 
+            # Get raw collection response
             raw_collection = escape.json_decode(response.body)
             if hasattr(self, 'parse'):
                 raw_collection = self.parse(raw_collection)
@@ -146,6 +147,7 @@ class Collection(object):
 
             result = []
             try:
+                # Build each model from the raw collection
                 for raw in raw_collection:
                     r = self.model()
                     if hasattr(r, 'parse'):
@@ -154,6 +156,7 @@ class Collection(object):
                         r.update(raw)
                     result.append(r)
             except ValueError as error:
+                # booby.Model error
                 callback(None, error)
                 return
             callback(result, None)
