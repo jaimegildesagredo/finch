@@ -94,7 +94,7 @@ class TestGetEntireCollection(AsyncTestCase):
             has_properties(id=2, name=u'Jack', email=u'jack@example.com')
         ))
 
-    def test_when_collection_is_not_found_then_runs_callback_with_error(self):
+    def test_when_collection_is_not_found_then_runs_callback_with_http_error(self):
         self.client.response = httplib.NOT_FOUND, 'Not Found'
 
         self.collection.all(self.stop)
@@ -117,7 +117,7 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('GET'))
 
-    def test_when_model_has_not_parse_method_then_runs_callback_with_error(self):
+    def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_collection = escape.json_encode([
             {
                 'id': 1,
@@ -173,7 +173,7 @@ class TestGetEntireCollection(AsyncTestCase):
             has_properties(id=2, name=u'Jack', email=u'jack@example.com')
         ))
 
-    def test_when_collection_has_not_parse_method_then_runs_callback_with_error(self):
+    def test_when_collection_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_collection = escape.json_encode({
             'users': [
                 {
