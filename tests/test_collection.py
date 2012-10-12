@@ -41,7 +41,7 @@ class User(Model):
     email = StringField()
 
 
-class UserWithParser(User): # FIXME: Rename model
+class UserWithParse(User):
     def parse(self, raw):
         return {
             'id': raw['id'],
@@ -61,7 +61,7 @@ class UsersWithCollectionParse(Users):
 
 
 class UsersWithModelParse(Users):
-    model = UserWithParser
+    model = UserWithParse
 
 
 class TestGetEntireCollection(AsyncTestCase):
