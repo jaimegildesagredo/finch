@@ -15,110 +15,10 @@
 # limitations under the License.
 
 import httplib
-import logging
 
 from tornado import escape
 
 from booby import Model, EmbeddedModel, IntegerField, StringField, BoolField
-
-
-class Session(object):
-    def __init__(self, endpoint, client):
-        self.endpoint = endpoint
-        self.client = client
-        self.logger = logging.getLogger('finch.session')
-
-    def all(self, model, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(collection=None, error=SessionError(httplib.responses[response.code]))
-                return
-
-            collection = escape.json_decode(response.body)
-            if hasattr(model._collection, 'parse'):
-                collection = model._collection.parse(collection)
-
-            try:
-                result = []
-                for raw in collection:
-                    r = model()
-                    r.update(r.parse(raw))
-                    result.append(r)
-            except ValueError as error:
-                result = None
-            else:
-                error = None
-            finally:
-                callback(collection=result, error=error)
-
-        url = self.url(model)
-        self.client.fetch(url, callback=on_response)
-        self.logger.info('GET {0}'.format(url))
-
-    def get(self, model, id_, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(model=None, error=SessionError(httplib.responses[response.code]))
-                return
-
-            result = model()
-
-            try:
-                result.update(result.parse(escape.json_decode(response.body)))
-            except ValueError as error:
-                result = None
-            else:
-                error = None
-            finally:
-                callback(model=result, error=error)
-
-        url = self.url(model, id_)
-        self.client.fetch(url, callback=on_response)
-        self.logger.info('GET {0}'.format(url))
-
-    def add(self, model, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(model=None, error=SessionError(httplib.responses[response.code]))
-                return
-
-            result = model
-
-            try:
-                result.update(result.parse(escape.json_decode(response.body)))
-            except ValueError as error:
-                result = None
-            else:
-                error = None
-
-            callback(model=result, error=error)
-
-        url = self.url(model)
-        self.client.fetch(url, method='POST',
-            body=escape.json_encode(model.to_dict()), callback=on_response)
-
-        self.logger.info('POST {0}'.format(url))
-
-    def url(self, model, id_=None):
-        result = self.endpoint + '/'
-
-        if isinstance(model._collection, Collection):
-            result += model._collection.url
-        else:
-            result += model._collection
-
-        if id_ is not None:
-            result += '/' + str(id_)
-        return result
-
-
-class SessionError(Exception):
-    pass
-
-
-class Resource(Model):
-    def parse(self, raw):
-        return raw
 
 
 class Collection(object):
@@ -214,5 +114,5 @@ class HTTPError(Exception):
         self.code = code
 
 
-__all__ = ['Resource', 'Model', 'Collection', 'Session', 'SessionError',
-    'EmbeddedModel', 'IntegerField', 'StringField', 'BoolField']
+__all__ = ['Collection', 'Model', 'EmbeddedModel', 'IntegerField',
+    'StringField', 'BoolField', 'HTTPError']
