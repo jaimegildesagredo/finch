@@ -107,7 +107,7 @@ class TestGetEntireCollection(AsyncTestCase):
             message=httplib.responses[httplib.NOT_FOUND]))
 
     def test_when_fetching_collection_then_client_performs_http_get(self):
-        self.client.response = httplib.NOT_FOUND, 'Not Found'# FIXME: Response: 200, json_collection
+        self.client.response = httplib.OK, self.json_collection
 
         self.collection.all(self.stop)
         self.wait()
