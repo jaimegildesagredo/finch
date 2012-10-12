@@ -8,6 +8,34 @@ import finch
 import fake_httpclient
 
 
+class User(finch.Resource):
+    _collection = 'users'
+
+    id = finch.IntegerField()
+    name = finch.StringField()
+    email = finch.StringField()
+
+
+class UserWithCustomParseMethod(User):
+    def parse(self, raw):
+        return {
+            'id': raw['id'],
+            'name': raw['name'],
+            'email': raw['email']
+        }
+
+
+class Users(finch.Collection):
+    url = User._collection
+
+    def parse(self, raw):
+        return raw['users']
+
+
+class UserWithCustomCollectionParse(User):
+    _collection = Users()
+
+
 class TestSessionGetCollection(testing.AsyncTestCase):
     URL = 'http://example.com/api'
 
@@ -105,6 +133,27 @@ class TestSessionGetCollection(testing.AsyncTestCase):
         self.assertIsNone(users)
         self.assertIsInstance(error, ValueError)
         self.assertEqual(error.message, "Invalid field 'last_name'")
+
+    def test_when_collection_has_custom_parse_method_then_runs_callback_with_collection(self):
+        self.client.response = httplib.OK, escape.json_encode({
+            'users': [
+                {
+                    'id': 2,
+                    'name': 'Jack',
+                    'email': 'jack@example.com'
+                }
+            ]
+        })
+
+        self.session.all(UserWithCustomCollectionParse, self.stop)
+        result = self.wait()
+
+        users, error = result['collection'], result['error']
+
+        self.assertIsNone(error)
+        self.assertEqual(users[0].id, 2)
+        self.assertEqual(users[0].name, 'Jack')
+        self.assertEqual(users[0].email, 'jack@example.com')
 
 
 class TestSession(testing.AsyncTestCase):
@@ -291,20 +340,3 @@ class TestSession(testing.AsyncTestCase):
 
         self.client = fake_httpclient.HTTPClient()
         self.session = finch.Session(self.URL, client=self.client)
-
-
-class User(finch.Resource):
-    _collection = 'users'
-
-    id = finch.IntegerField()
-    name = finch.StringField()
-    email = finch.StringField()
-
-
-class UserWithCustomParseMethod(User):
-    def parse(self, raw):
-        return {
-            'id': raw['id'],
-            'name': raw['name'],
-            'email': raw['email']
-        }

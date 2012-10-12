@@ -35,9 +35,13 @@ class Session(object):
                 callback(collection=None, error=SessionError(httplib.responses[response.code]))
                 return
 
+            collection = escape.json_decode(response.body)
+            if hasattr(model._collection, 'parse'):
+                collection = model._collection.parse(collection)
+
             try:
                 result = []
-                for raw in escape.json_decode(response.body):
+                for raw in collection:
                     r = model()
                     r.update(r.parse(raw))
                     result.append(r)
@@ -97,7 +101,13 @@ class Session(object):
         self.logger.info('POST {0}'.format(url))
 
     def url(self, model, id_=None):
-        result = self.endpoint + '/' + model._collection
+        result = self.endpoint + '/'
+
+        if isinstance(model._collection, Collection):
+            result += model._collection.url
+        else:
+            result += model._collection
+
         if id_ is not None:
             result += '/' + str(id_)
         return result
@@ -112,5 +122,9 @@ class Resource(booby.Model):
         return raw
 
 
-__all__ = ['Resource', 'Session', 'SessionError', 'EmbeddedModel',
-    'IntegerField', 'StringField', 'BoolField']
+class Collection(object):
+    pass
+
+
+__all__ = ['Resource', 'Collection', 'Session', 'SessionError',
+    'EmbeddedModel', 'IntegerField', 'StringField', 'BoolField']
