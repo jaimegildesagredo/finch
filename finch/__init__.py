@@ -214,9 +214,5 @@ class HTTPError(Exception):
         self.code = code
 
 
-class CollectionError(Exception):
-    pass
-
-
 __all__ = ['Resource', 'Model', 'Collection', 'Session', 'SessionError',
     'EmbeddedModel', 'IntegerField', 'StringField', 'BoolField']
