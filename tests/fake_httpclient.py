@@ -6,6 +6,7 @@ class HTTPClient(object):
         self._response = None
         self._last_request = None
 
+    # TODO: Rename response to next_response
     @property
     def response(self):
         return self._response
