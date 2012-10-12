@@ -2,49 +2,39 @@
 
 from tornado import httpclient, ioloop
 
-import finch
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-logging.info('foo')
+from finch import *
 
 
-class Repo(finch.Resource):
-    _collection = 'users/jaimegildesagredo/repos'
+class Repos(Collection):
+    url = 'https://api.github.com/users/jaimegildesagrdo/repos'
 
-    id = finch.IntegerField()
-    name = finch.StringField()
-    owner = finch.StringField()
-    private = finch.BoolField()
+    class model(Model):
+        id = IntegerField()
+        name = StringField()
+        owner = StringField()
+        private = BoolField()
 
-    def parse(self, raw):
-        return {
-            'id': raw['id'],
-            'name': raw['name'],
-            'owner': raw['owner']['login'],
-            'private': raw['private']
-        }
+        def parse(self, raw):
+            return {
+                'id': raw['id'],
+                'name': raw['name'],
+                'owner': raw['owner']['login'],
+                'private': raw['private']
+            }
 
 
 if __name__ == '__main__':
-    session = finch.Session('https://api.github.com', httpclient.AsyncHTTPClient())
+    repositories = Repos(httpclient.AsyncHTTPClient())
 
-    def on_repo(model, error):
-        if error is None:
-            print dict(model)
-        else:
-            print error.message
+    def on_repos(repos, error):
         ioloop.IOLoop.instance().stop()
 
-    def on_repos(collection, error):
-        if error is None:
-            for repo in collection:
-                print dict(repo)
-        else:
-            print error.message
-        ioloop.IOLoop.instance().stop()
+        if error:
+            print 'Error fetching repos.'
+            raise error
 
-#    session.get(Repo, 'cormoran', on_repo)
-    session.all(Repo, on_repos)
+        for repo in repos:
+            print repo.id, repo.name
+
+    repositories.all(on_repos)
     ioloop.IOLoop.instance().start()
