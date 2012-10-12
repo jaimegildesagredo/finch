@@ -19,8 +19,7 @@ import logging
 
 from tornado import escape
 
-import booby
-from booby import EmbeddedModel, IntegerField, StringField, BoolField
+from booby import Model, EmbeddedModel, IntegerField, StringField, BoolField
 
 
 class Session(object):
@@ -117,14 +116,60 @@ class SessionError(Exception):
     pass
 
 
-class Resource(booby.Model):
+class Resource(Model):
     def parse(self, raw):
         return raw
 
 
 class Collection(object):
+    model = None
+
+    def __init__(self, client):
+        self.client = client
+
+    def all(self, callback):
+        def on_response(response):
+            if response.code >= httplib.BAD_REQUEST:
+                callback(None, HTTPError(response.code))
+                return
+
+            raw_collection = escape.json_decode(response.body)
+            if hasattr(self, 'parse'):
+                raw_collection = self.parse(raw_collection)
+
+            if not isinstance(raw_collection, list):
+                callback(None, ValueError("""
+                    Response content should be a list.
+                    Overwrite the Collection.parse method to create a valid response.
+                    """))
+                return
+
+            result = []
+            try:
+                for raw in raw_collection:
+                    r = self.model()
+                    if hasattr(r, 'parse'):
+                        r.update(r.parse(raw))
+                    else:
+                        r.update(raw)
+                    result.append(r)
+            except ValueError as error:
+                callback(None, error)
+                return
+            callback(result, None)
+
+        self.client.fetch(self.url, callback=on_response)
+
+
+class HTTPError(Exception):
+    def __init__(self, code):
+        super(HTTPError, self).__init__(httplib.responses[code])
+        self.code = code
+
+
+class CollectionError(Exception):
     pass
 
 
-__all__ = ['Resource', 'Collection', 'Session', 'SessionError',
+__all__ = ['Resource', 'Model', 'Collection', 'Session', 'SessionError',
     'EmbeddedModel', 'IntegerField', 'StringField', 'BoolField']
