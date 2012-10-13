@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import httplib
+from urllib import splitquery
 
 from tornado import escape
 
@@ -86,7 +87,17 @@ class Collection(object):
 
             callback(result, None)
 
-        self.client.fetch('{0}/{1}'.format(self.url, id_), callback=on_response)
+        self.client.fetch(self._url(id_), callback=on_response)
+
+    def _url(self, id_):
+        url, query = splitquery(self.url)
+
+        url = '{0}/{1}'.format(url, id_)
+
+        if query is not None:
+            url = '{0}?{1}'.format(url, query)
+
+        return url
 
     def add(self, obj, callback):
         def on_response(response):

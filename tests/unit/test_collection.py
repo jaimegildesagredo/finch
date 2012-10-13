@@ -269,6 +269,16 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users/1'))
         assert_that(last_request.method, is_('GET'))
 
+    def test_when_collection_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
+        self.collection.url += '?type=json'
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.get(1, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users/1?type=json'))
+
     def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
             'id': 1,
