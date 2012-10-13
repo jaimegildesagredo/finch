@@ -2,3 +2,4 @@
 nose
 pyhamcrest
 behave
+doublex

@@ -20,6 +20,8 @@ from tornado import escape
 
 from booby import Model, EmbeddedModel, IntegerField, StringField, BoolField
 
+from session import Session
+
 
 class Collection(object):
     model = None
@@ -122,5 +124,5 @@ class HTTPError(Exception):
         self.code = code
 
 
-__all__ = ['Collection', 'Model', 'EmbeddedModel', 'IntegerField',
+__all__ = ['Session', 'Collection', 'Model', 'EmbeddedModel', 'IntegerField',
     'StringField', 'BoolField', 'HTTPError']
