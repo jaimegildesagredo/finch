@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from behave import given, when, then
+from behave import when, then
 from tornado import ioloop
-
-
-@given(u'I have the users collection')
-def impl(context):
-    assert context.collection
 
 
 @when(u'I get all the users')

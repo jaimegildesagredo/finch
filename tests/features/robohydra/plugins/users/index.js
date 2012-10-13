@@ -4,6 +4,7 @@ exports.getBodyParts = function (conf) {
     return {
         heads: [
             new RoboHydraHead({
+                name: 'users',
                 path: '/users',
                 handler: function(req, res) {
                     var result;
@@ -19,6 +20,13 @@ exports.getBodyParts = function (conf) {
                     }
 
                     res.send(JSON.stringify(result));
+                }
+            }),
+            new RoboHydraHead({
+                name: 'user',
+                path: '/users/:id',
+                handler: function(req, res) {
+                    res.send(JSON.stringify({name: 'Jack', id: req.params.id}));
                 }
             })
         ]
