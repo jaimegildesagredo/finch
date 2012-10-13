@@ -9,6 +9,14 @@ exports.getBodyParts = function (conf) {
                 handler: function(req, res) {
                     var result;
 
+                    // HTTP Basic Auth for user 'admin' and password 'admin'
+                    if (req.queryParams.auth) {
+                        if (req.headers.authorization != 'Basic YWRtaW46YWRtaW4=') {
+                            res.statusCode = 401;
+                            res.send('Unauthorized');
+                        }
+                    }
+
                     if (req.method == 'POST') {
                         result = JSON.parse(req.rawBody.toString());
                         result.id = 1;
@@ -26,6 +34,14 @@ exports.getBodyParts = function (conf) {
                 name: 'user',
                 path: '/users/:id',
                 handler: function(req, res) {
+                    // HTTP Basic Auth for user 'admin' and password 'admin'
+                    if (req.queryParams.auth) {
+                        if (req.headers.authorization != 'Basic YWRtaW46YWRtaW4=') {
+                            res.statusCode = 401;
+                            res.send('Unauthorized');
+                        }
+                    }
+
                     res.send(JSON.stringify({name: 'Jack', id: req.params.id}));
                 }
             })

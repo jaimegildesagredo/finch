@@ -2,6 +2,7 @@
 
 from behave import given, when, then
 from tornado import ioloop
+from hamcrest import *
 
 
 @given(u'I have the "{name}" user')
@@ -18,7 +19,7 @@ def impl(context):
     context.collection.add(context.user, on_added)
     ioloop.IOLoop.instance().start()
 
-    assert not context.error
+    assert_that(context.error, is_(None))
 
 
 @then(u'the user should have an id')
