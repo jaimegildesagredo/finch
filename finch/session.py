@@ -16,17 +16,7 @@
 
 """This module is a wrapper on top of the Tornado's HTTPClient."""
 
-
 import base64
-
-
-def _basic_auth_str(username, password=None):
-    auth = '{0}:'.format(username)
-
-    if password is not None:
-        auth += '{0}'.format(password)
-
-    return 'Basic ' + base64.b64encode(auth)
 
 
 class Session(object):
@@ -42,3 +32,12 @@ class Session(object):
             headers['Authorization'] = _basic_auth_str(*self.auth)
 
         self.http_client.fetch(*args, **kwargs)
+
+
+def _basic_auth_str(username, password=None):
+    auth = '{0}:'.format(username)
+
+    if password is not None:
+        auth += '{0}'.format(password)
+
+    return 'Basic ' + base64.b64encode(auth)
