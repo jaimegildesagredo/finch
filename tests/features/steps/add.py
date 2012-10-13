@@ -1,28 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from behave import given, when, then
-from tornado import httpclient, ioloop
-
-from booby import Model, IntegerField, StringField
-from finch import Collection
-
-
-class User(Model):
-    id = IntegerField()
-    name = StringField()
-
-
-class Users(Collection):
-    model = User
-    url = 'http://localhost:3000/users'
-
-
-users = Users(httpclient.AsyncHTTPClient())
+from tornado import ioloop
 
 
 @given(u'I have the "{name}" user')
 def impl(context, name):
-    context.user = User(name=name)
+    context.user = context.collection.model(name=name)
 
 
 @when(u'I add it to the collection')
@@ -31,7 +15,7 @@ def impl(context):
         ioloop.IOLoop.instance().stop()
         context.error = error
 
-    users.add(context.user, on_added)
+    context.collection.add(context.user, on_added)
     ioloop.IOLoop.instance().start()
 
     assert not context.error
