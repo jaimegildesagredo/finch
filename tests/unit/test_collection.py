@@ -5,7 +5,7 @@ import httplib
 from tornado import testing, escape
 from hamcrest import *
 
-from tests import fake_httpclient
+from tests.unit import fake_httpclient
 
 import finch
 from finch import Collection, Model, IntegerField, StringField
