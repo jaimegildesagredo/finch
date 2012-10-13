@@ -1,4 +1,4 @@
-Feature: Add a user to the users collection
+Feature: Add an user to the users collection
 
     Scenario: Add a new user
         Given I have the "Jack" user
