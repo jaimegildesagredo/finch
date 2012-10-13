@@ -8,7 +8,7 @@ from finch import Session
 
 
 class TestSession(object):
-    def test_when_fetch_calls_http_client_fetch_with_the_same_args(self): #FIXME: test_when_fetch_then_call_http_client_fetch_with_the_same_args
+    def test_when_fetch_then_calls_http_client_fetch_with_the_same_args(self):
         with Spy(httpclient.HTTPClient()) as http_client:
             session = Session(http_client)
 
