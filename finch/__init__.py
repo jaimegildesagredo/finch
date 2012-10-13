@@ -105,7 +105,8 @@ class Collection(object):
 
             callback(obj, None)
 
-        self.client.fetch(self.url, method='POST', callback=on_response)
+        self.client.fetch(self.url, method='POST',
+            body=escape.json_encode(obj.to_dict()), callback=on_response)
 
 
 class HTTPError(Exception):

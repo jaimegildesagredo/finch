@@ -348,6 +348,8 @@ class TestAddModelToCollection(AsyncTestCase):
     def test_when_creating_model_then_client_performs_http_post(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
+        expected_body = escape.json_encode(self.user.to_dict())
+
         self.collection.add(self.user, self.stop)
         self.wait()
 
@@ -355,6 +357,7 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('POST'))
+        assert_that(last_request.body, is_(expected_body))
 
     def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
