@@ -113,7 +113,12 @@ class Collection(object):
 
 class HTTPError(Exception):
     def __init__(self, code):
-        super(HTTPError, self).__init__(httplib.responses[code])
+        if code == 599:
+            message = 'Timeout'
+        else:
+            message = httplib.responses[code]
+
+        super(HTTPError, self).__init__(message)
         self.code = code
 
 

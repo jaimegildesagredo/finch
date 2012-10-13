@@ -101,9 +101,7 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(not users)
         assert_that(error, instance_of(finch.HTTPError))
-        assert_that(error, has_properties(
-            code=httplib.NOT_FOUND,
-            message=httplib.responses[httplib.NOT_FOUND]))
+        assert_that(error, has_property('code', httplib.NOT_FOUND))
 
     def test_when_fetching_collection_then_client_performs_http_get(self):
         self.client.next_response = httplib.OK, self.json_collection
@@ -258,9 +256,7 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(not user)
         assert_that(error, instance_of(finch.HTTPError))
-        assert_that(error, has_properties(
-            code=httplib.NOT_FOUND,
-            message=httplib.responses[httplib.NOT_FOUND]))
+        assert_that(error, has_property('code', httplib.NOT_FOUND))
 
     def test_when_fetching_model_then_client_performs_http_get(self):
         self.client.next_response = httplib.OK, self.json_model
@@ -341,9 +337,7 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(not user)
         assert_that(error, instance_of(finch.HTTPError))
-        assert_that(error, has_properties(
-            code=httplib.BAD_REQUEST,
-            message=httplib.responses[httplib.BAD_REQUEST]))
+        assert_that(error, has_property('code', httplib.BAD_REQUEST))
 
     def test_when_creating_model_then_client_performs_http_post(self):
         self.client.next_response = httplib.CREATED, self.json_model
