@@ -23,7 +23,7 @@ class HTTPClient(object):
         self._last_request = _HTTPRequest(*value)
 
     def fetch(self, request, callback, **kwargs):
-        self.last_request = request, kwargs.get('method', 'GET'), kwargs.get('body')
+        self.last_request = request, kwargs
 
         callback(self.next_response)
 
@@ -35,7 +35,8 @@ class _HTTPResponse(object):
 
 
 class _HTTPRequest(object):
-    def __init__(self, url, method, body):
+    def __init__(self, url, options):
         self.url = url
-        self.method = method
-        self.body = body
+        self.method = options.get('method', 'GET')
+        self.body = options.get('body')
+        self.headers = options.get('headers')

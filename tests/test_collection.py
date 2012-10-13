@@ -358,6 +358,7 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('POST'))
         assert_that(last_request.body, is_(expected_body))
+        assert_that(last_request.headers, has_entry('Content-Type', 'application/json'))
 
     def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
