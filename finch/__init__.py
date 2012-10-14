@@ -90,7 +90,7 @@ class Collection(object):
         self.client.fetch(self._url(id_), callback=on_response)
 
     def _url(self, id_):
-        url, query = splitquery(self.url)
+        url, query = splitquery(getattr(self.model, '_url', self.url))
 
         url = '{0}/{1}'.format(url, id_)
 
