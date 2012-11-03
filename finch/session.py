@@ -16,28 +16,20 @@
 
 """This module is a wrapper on top of the Tornado's HTTPClient."""
 
-import base64
+from finch.auth import HTTPBasicAuth
 
 
 class Session(object):
     def __init__(self, http_client, auth=None):
         self.http_client = http_client
-        self.auth = auth
+
+        if auth is not None:
+            self.auth = HTTPBasicAuth(*auth)
+        else:
+            self.auth = None
 
     def fetch(self, *args, **kwargs):
         if self.auth is not None:
-            headers = kwargs.get('headers', {})
-            if not headers:
-                kwargs['headers'] = headers
-            headers['Authorization'] = _basic_auth_str(*self.auth)
+            args, kwargs = self.auth(args, kwargs)
 
         self.http_client.fetch(*args, **kwargs)
-
-
-def _basic_auth_str(username, password=None):
-    auth = '{0}:'.format(username)
-
-    if password is not None:
-        auth += '{0}'.format(password)
-
-    return 'Basic ' + base64.b64encode(auth)
