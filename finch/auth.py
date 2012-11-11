@@ -8,13 +8,8 @@ class HTTPBasicAuth(object):
         self.username = username
         self.password = password
 
-    def __call__(self, args, kwargs):
-        if not 'headers' in kwargs:
-            kwargs['headers'] = {}
-
-        kwargs['headers']['Authorization'] = _basic_auth_str(self.username, self.password)
-
-        return args, kwargs
+    def __call__(self, request):
+        request.headers['Authorization'] = _basic_auth_str(self.username, self.password)
 
 
 def _basic_auth_str(username, password=None):

@@ -16,6 +16,8 @@
 
 """This module is a wrapper on top of the Tornado's HTTPClient."""
 
+from tornado import httpclient
+
 from finch.auth import HTTPBasicAuth
 
 
@@ -28,8 +30,10 @@ class Session(object):
         else:
             self.auth = None
 
-    def fetch(self, *args, **kwargs):
-        if self.auth is not None:
-            args, kwargs = self.auth(args, kwargs)
+    def fetch(self, url, callback, **kwargs):
+        request = httpclient.HTTPRequest(url=url, **kwargs)
 
-        self.http_client.fetch(*args, **kwargs)
+        if self.auth is not None:
+            self.auth(request)
+
+        self.http_client.fetch(request, callback=callback)
