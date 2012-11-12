@@ -6,7 +6,7 @@ from doublex import *
 
 from tests.matchers import has_properties
 
-from finch import Session
+from finch import Session, auth
 
 
 CALLBACK = lambda: None
@@ -31,33 +31,19 @@ class TestSession(object):
 
 
 class TestSessionWithBasicAuth(object):
-    def test_when_fetch_then_perform_request_with_basic_auth(self):
-        with Spy(httpclient.HTTPClient()) as http_client:
-            session = Session(http_client, auth=('root', 'toor'))
+    def test_when_auth_is_username_and_password_tuple_then_session_uses_basic_auth(self):
+        session = Session(Stub(), auth=(u'root', u'toor'))
 
-        session.fetch('/users', callback=CALLBACK)
+        assert_that(session.auth, instance_of(auth.HTTPBasicAuth))
+        assert_that(session.auth, has_properties(
+            username=u'root', password=u'toor'))
 
-        assert_that(http_client.fetch, called().with_args(
-            has_properties(
-                url='/users',
-                headers=has_entry('Authorization', 'Basic cm9vdDp0b29y')
-            ),
-            ANY_ARG
-        ))
+    def test_when_auth_is_username_tuple_then_session_uses_basic_auth(self):
+        session = Session(Stub(), auth=(u'root',))
 
-    def test_when_fetch_only_with_an_username_then_perform_request_with_basic_auth(self):
-        with Spy(httpclient.HTTPClient()) as http_client:
-            session = Session(http_client, auth=('root',))
-
-        session.fetch('/users', callback=CALLBACK)
-
-        assert_that(http_client.fetch, called().with_args(
-            has_properties(
-                url='/users',
-                headers=has_entry('Authorization', 'Basic cm9vdDo=')
-            ),
-            ANY_ARG
-        ))
+        assert_that(session.auth, instance_of(auth.HTTPBasicAuth))
+        assert_that(session.auth, has_properties(
+            username=u'root', password=None))
 
 
 class TestSessionWithAuth(object):
