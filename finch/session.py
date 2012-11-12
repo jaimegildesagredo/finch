@@ -25,10 +25,10 @@ class Session(object):
     def __init__(self, http_client, auth=None):
         self.http_client = http_client
 
-        if auth is not None:
+        if isinstance(auth, tuple):
             self.auth = HTTPBasicAuth(*auth)
         else:
-            self.auth = None
+            self.auth = auth
 
     def fetch(self, url, callback, **kwargs):
         request = httpclient.HTTPRequest(url=url, **kwargs)

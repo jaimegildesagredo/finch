@@ -58,3 +58,14 @@ class TestSessionWithBasicAuth(object):
             ),
             ANY_ARG
         ))
+
+
+class TestSessionWithAuth(object):
+    def test_when_fetch_then_performs_auth(self):
+        auth = Spy().auth
+
+        session = Session(Stub(), auth=auth)
+
+        session.fetch('/users', callback=CALLBACK)
+
+        assert_that(auth, called().with_args(instance_of(httpclient.HTTPRequest)))
