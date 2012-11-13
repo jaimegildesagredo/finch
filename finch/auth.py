@@ -33,9 +33,9 @@ class OAuth1(object):
         )
 
     def __call__(self, request):
-        request.url, request.headers, _ = self._oauth_client.sign(
+        request.url, request.headers, request.body = self._oauth_client.sign(
             unicode(request.url),
             unicode(request.method),
-            None,
+            request.body,
             request.headers
         )
