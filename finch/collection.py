@@ -114,9 +114,14 @@ class Collection(object):
 
             callback(obj, None)
 
+        if hasattr(obj, 'encode'):
+            body, content_type = obj.encode()
+        else:
+            body, content_type = escape.json_encode(obj.to_dict()), 'application/json'
+
         self.client.fetch(self.url, method='POST',
-            headers={'Content-Type': 'application/json'},
-            body=escape.json_encode(obj.to_dict()),
+            headers={'Content-Type': content_type},
+            body=body,
             callback=on_response)
 
 
