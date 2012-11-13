@@ -4,7 +4,12 @@ from tornado import httpclient
 from hamcrest import *
 from doublex import *
 
-from finch import Session
+from tests.matchers import has_properties
+
+from finch import Session, auth
+
+
+CALLBACK = lambda: None
 
 
 class TestSession(object):
@@ -12,32 +17,41 @@ class TestSession(object):
         with Spy(httpclient.HTTPClient()) as http_client:
             session = Session(http_client)
 
-        callback = Stub()
-
-        session.fetch('/users', method='POST', callback=callback,
+        session.fetch('/users', method='POST', callback=CALLBACK,
             headers={'Content-Type': 'application/json'})
 
         assert_that(http_client.fetch, called().with_args(
-            '/users', method='POST', callback=callback,
-                headers={'Content-Type': 'application/json'})
-            )
+            has_properties(
+                url='/users',
+                method='POST',
+                headers={'Content-Type': 'application/json'}
+            ),
+            callback=CALLBACK
+        ))
 
 
 class TestSessionWithBasicAuth(object):
-    def test_when_fetch_then_perform_request_with_basic_auth(self):
-        with Spy(httpclient.HTTPClient()) as http_client:
-            session = Session(http_client, auth=('root', 'toor'))
+    def test_when_auth_is_username_and_password_tuple_then_session_uses_basic_auth(self):
+        session = Session(Stub(), auth=(u'root', u'toor'))
 
-        session.fetch('/users')
+        assert_that(session.auth, instance_of(auth.HTTPBasicAuth))
+        assert_that(session.auth, has_properties(
+            username=u'root', password=u'toor'))
 
-        assert_that(http_client.fetch, called().with_args('/users',
-            headers=has_entry('Authorization', 'Basic cm9vdDp0b29y')))
+    def test_when_auth_is_username_tuple_then_session_uses_basic_auth(self):
+        session = Session(Stub(), auth=(u'root',))
 
-    def test_when_fetch_only_with_an_username_then_perform_request_with_basic_auth(self):
-        with Spy(httpclient.HTTPClient()) as http_client:
-            session = Session(http_client, auth=('root',))
+        assert_that(session.auth, instance_of(auth.HTTPBasicAuth))
+        assert_that(session.auth, has_properties(
+            username=u'root', password=None))
 
-        session.fetch('/users')
 
-        assert_that(http_client.fetch, called().with_args('/users',
-            headers=has_entry('Authorization', 'Basic cm9vdDo=')))
+class TestSessionWithAuth(object):
+    def test_when_fetch_then_performs_auth(self):
+        auth = Spy().auth
+
+        session = Session(Stub(), auth=auth)
+
+        session.fetch('/users', callback=CALLBACK)
+
+        assert_that(auth, called().with_args(instance_of(httpclient.HTTPRequest)))

@@ -6,14 +6,11 @@ import httplib
 from tornado import testing, escape
 from hamcrest import *
 
+from tests.matchers import has_properties
 from tests.unit import fake_httpclient
 
 import finch
 from finch import Collection, Model, IntegerField, StringField
-
-
-def has_properties(**kwargs):
-    return all_of(*[has_property(k, v) for k, v in kwargs.iteritems()])
 
 
 class AsyncTestCase(testing.AsyncTestCase):
