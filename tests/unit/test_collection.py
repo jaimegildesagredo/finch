@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import urllib
 import httplib
 
 from tornado import testing, escape
@@ -51,6 +52,11 @@ class UserWithParse(User):
 
 class UserWithUrl(User):
     _url = '/users-resource'
+
+
+class UserWithEncode(User):
+    def encode(self):
+        return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
 
 
 class Users(Collection):
@@ -381,8 +387,6 @@ class TestAddModelToCollection(AsyncTestCase):
     def test_when_creating_model_then_client_performs_http_post(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
-        expected_body = escape.json_encode(self.user.to_dict())
-
         self.collection.add(self.user, self.stop)
         self.wait()
 
@@ -390,8 +394,34 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('POST'))
+
+    def test_when_model_has_not_encode_method_then_client_performs_http_post_with_json_body(self):
+        self.client.next_response = httplib.CREATED, self.json_model
+
+        expected_body = escape.json_encode(self.user.to_dict())
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        last_request = self.client.last_request
+
         assert_that(last_request.body, is_(expected_body))
         assert_that(last_request.headers, has_entry('Content-Type', 'application/json'))
+
+    def test_when_model_has_encode_method_then_client_performs_http_post_with_custom_body(self):
+        self.client.next_response = httplib.CREATED, self.json_model
+
+        self.user = UserWithEncode(name='Foo', email='foo@example.com')
+
+        expected_body = urllib.urlencode(self.user.to_dict())
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        last_request = self.client.last_request
+
+        assert_that(last_request.body, is_(expected_body))
+        assert_that(last_request.headers, has_entry('Content-Type', 'application/x-www-form-urlencoded'))
 
     def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
