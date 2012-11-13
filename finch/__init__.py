@@ -19,7 +19,7 @@ from booby import Model, EmbeddedModel, IntegerField, StringField, BoolField
 from session import Session
 from collection import Collection, HTTPError
 
-__version__ = '0.2.2'
+__version__ = '0.3'
 
 __all__ = [
     'Session',
