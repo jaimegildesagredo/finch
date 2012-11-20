@@ -51,6 +51,12 @@ class UserWithUrl(User):
     _url = '/users-resource'
 
 
+class UserWithStaticUrlMethod(User):
+    @staticmethod
+    def _url(id_):
+        return '/users?' + urllib.urlencode({'id': id_})
+
+
 class UserWithEncode(User):
     def encode(self):
         return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
@@ -72,6 +78,10 @@ class UsersWithModelParse(Users):
 
 class UsersWithModelUrl(Users):
     model = UserWithUrl
+
+
+class UsersWithModelStaticUrlMethod(Users):
+    model = UserWithStaticUrlMethod
 
 
 class TestGetEntireCollection(AsyncTestCase):
@@ -269,7 +279,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(error, instance_of(finch.HTTPError))
         assert_that(error, has_property('code', httplib.NOT_FOUND))
 
-    def test_when_fetching_model_then_client_performs_http_get(self):
+    def test_when_fetching_model_then_client_performs_http_get_using_the_collection_url(self):
         self.client.next_response = httplib.OK, self.json_model
 
         self.collection.get(1, self.stop)
@@ -280,7 +290,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users/1'))
         assert_that(last_request.method, is_('GET'))
 
-    def test_when_fetching_model_with_url_then_client_performs_http_get_using_the_model_url(self):
+    def test_when_fetching_model_with_url_attribute_then_client_performs_http_get_using_the_model_url(self):
         self.collection = UsersWithModelUrl(self.client)
 
         self.client.next_response = httplib.OK, self.json_model
@@ -289,16 +299,6 @@ class TestGetModelFromCollection(AsyncTestCase):
         self.wait()
 
         assert_that(self.client.last_request.url, is_('/users-resource/1'))
-
-    def test_when_collection_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
-        self.collection.url += '?type=json'
-
-        self.client.next_response = httplib.OK, self.json_model
-
-        self.collection.get(1, self.stop)
-        self.wait()
-
-        assert_that(self.client.last_request.url, is_('/users/1?type=json'))
 
     def test_when_model_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
         self.collection = UsersWithModelUrl(self.client)
@@ -310,6 +310,26 @@ class TestGetModelFromCollection(AsyncTestCase):
         self.wait()
 
         assert_that(self.client.last_request.url, is_('/users-resource/1?type=json'))
+
+    def test_when_fetching_model_with_static_url_method_then_client_performs_http_get_with_returned_url(self):
+        self.collection = UsersWithModelStaticUrlMethod(self.client)
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.get(1, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users?id=1'))
+
+    def test_when_collection_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
+        self.collection.url += '?type=json'
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.get(1, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users/1?type=json'))
 
     def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({

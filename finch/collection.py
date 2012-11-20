@@ -86,7 +86,12 @@ class Collection(object):
         self.client.fetch(self._url(id_), callback=on_response)
 
     def _url(self, id_):
-        url, query = splitquery(getattr(self.model, '_url', self.url))
+        url = getattr(self.model, '_url', self.url)
+
+        if callable(url):
+            return url(id_)
+
+        url, query = splitquery(url)
 
         url = '{0}/{1}'.format(url, id_)
 
