@@ -6,7 +6,7 @@ from finch import *
 
 
 class Repos(Collection):
-    url = 'https://api.github.com/users/jaimegildesagrdo/repos'
+    url = 'https://api.github.com/users/jaimegildesagredo/repos'
 
     class model(Model):
         id = IntegerField()
