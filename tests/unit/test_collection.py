@@ -3,33 +3,14 @@
 import urllib
 import httplib
 
-from tornado import testing, escape
+from tornado import escape
 from hamcrest import *
 
 from tests.matchers import has_properties
-from tests.unit import fake_httpclient
+from tests.unit import AsyncTestCase, fake_httpclient
 
 import finch
 from finch import Collection, Model, IntegerField, StringField
-
-
-class AsyncTestCase(testing.AsyncTestCase):
-    def setUp(self):
-        super(AsyncTestCase, self).setUp()
-        self.setup()
-
-    def setup(self):
-        pass
-
-    def stop(self, *args, **kwargs):
-        """
-        Allows the default stop() method to store multiple
-        positional arguments when used as test callback along
-        with the wait() method.
-
-        """
-
-        super(AsyncTestCase, self).stop(args, **kwargs)
 
 
 class User(Model):
