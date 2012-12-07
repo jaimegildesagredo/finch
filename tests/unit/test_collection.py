@@ -14,23 +14,6 @@ from finch import Collection, Model, IntegerField, StringField
 
 
 class TestGetEntireCollection(AsyncTestCase):
-    def setup(self):
-        self.client = fake_httpclient.HTTPClient()
-        self.collection = Users(self.client)
-
-        self.json_collection = escape.json_encode([
-            {
-                'id': 1,
-                'name': 'Foo',
-                'email': 'foo@example.com'
-            },
-            {
-                'id': 2,
-                'name': 'Jack',
-                'email': 'jack@example.com'
-            }
-        ])
-
     def test_when_response_is_a_json_array_then_runs_callback_with_collection(self):
         self.client.next_response = httplib.OK, self.json_collection
 
@@ -177,18 +160,25 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('GET'))
 
-
-class TestGetModelFromCollection(AsyncTestCase):
     def setup(self):
         self.client = fake_httpclient.HTTPClient()
         self.collection = Users(self.client)
 
-        self.json_model = escape.json_encode({
-            'id': 1,
-            'name': 'Foo',
-            'email': 'foo@example.com'
-        })
+        self.json_collection = escape.json_encode([
+            {
+                'id': 1,
+                'name': 'Foo',
+                'email': 'foo@example.com'
+            },
+            {
+                'id': 2,
+                'name': 'Jack',
+                'email': 'jack@example.com'
+            }
+        ])
 
+
+class TestGetModelFromCollection(AsyncTestCase):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
         self.client.next_response = httplib.OK, self.json_model
 
@@ -297,13 +287,9 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(self.client.last_request.url, is_('/users/1?type=json'))
 
-
-class TestAddModelToCollection(AsyncTestCase):
     def setup(self):
         self.client = fake_httpclient.HTTPClient()
         self.collection = Users(self.client)
-
-        self.user = User(name='Foo', email='foo@example.com')
 
         self.json_model = escape.json_encode({
             'id': 1,
@@ -311,6 +297,8 @@ class TestAddModelToCollection(AsyncTestCase):
             'email': 'foo@example.com'
         })
 
+
+class TestAddModelToCollection(AsyncTestCase):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
@@ -406,6 +394,18 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('POST'))
+
+    def setup(self):
+        self.client = fake_httpclient.HTTPClient()
+        self.collection = Users(self.client)
+
+        self.user = User(name='Foo', email='foo@example.com')
+
+        self.json_model = escape.json_encode({
+            'id': 1,
+            'name': 'Foo',
+            'email': 'foo@example.com'
+        })
 
 
 class User(Model):
