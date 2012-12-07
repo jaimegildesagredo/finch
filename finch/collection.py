@@ -33,32 +33,25 @@ class Collection(object):
                 return
 
             # Get raw collection response
-            raw_collection = escape.json_decode(response.body)
+            collection = escape.json_decode(response.body)
             if hasattr(self, 'parse'):
-                raw_collection = self.parse(raw_collection)
+                collection = self.parse(collection)
 
-            if not isinstance(raw_collection, list):
+            if not isinstance(collection, list):
                 callback(None, ValueError("""
-                    Response content should be a list.
-                    Overwrite the Collection.parse method to create a valid response.
+                    Response body should be a json array.
+
+                    To properly process the response you can add a `parse(raw)`
+                    method to your collection class.
+
                     """))
                 return
 
-            result = []
             try:
-                # Build each model from the raw collection
-                for raw in raw_collection:
-                    r = self.model()
-                    if hasattr(r, 'parse'):
-                        r.update(r.parse(raw))
-                    else:
-                        r.update(raw)
-                    result.append(r)
+                callback([self.model(**r) for r in collection], None)
             except ValueError as error:
                 # booby.Model error
                 callback(None, error)
-                return
-            callback(result, None)
 
         self.client.fetch(self.url, callback=on_response)
 

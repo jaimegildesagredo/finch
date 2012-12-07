@@ -69,7 +69,15 @@ class Users(Collection):
 
 class UsersWithCollectionParse(Users):
     def parse(self, raw):
-        return raw['users']
+        result = []
+        for user in raw['users']:
+            result.append({
+                'id': user['id'],
+                'name': user['name'],
+                'email': user['email']
+            })
+
+        return result
 
 
 class UsersWithModelParse(Users):
@@ -135,7 +143,33 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('GET'))
 
-    def test_when_model_has_not_parse_method_then_runs_callback_with_value_error(self):
+    def test_when_response_is_not_a_json_array_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
+        self.json_collection = escape.json_encode({
+            'users': [
+                {
+                    'id': 1,
+                    'name': 'Foo',
+                    'email': 'foo@example.com'
+                },
+                {
+                    'id': 2,
+                    'name': 'Jack',
+                    'email': 'jack@example.com'
+                }
+            ]
+        })
+
+        self.client.next_response = httplib.OK, self.json_collection
+
+        self.collection.all(self.stop)
+        users, error = self.wait()
+
+        assert_that(not users)
+        assert_that(error, instance_of(ValueError))
+        assert_that(error.message, contains_string(
+            "Response body should be a json array."))
+
+    def test_when_response_resources_are_not_valid_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
         self.json_collection = escape.json_encode([
             {
                 'id': 1,
@@ -162,7 +196,7 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(error, instance_of(ValueError))
         assert_that(error.message, "Invalid field 'url'")
 
-    def test_when_model_has_parse_method_then_runs_callback_with_collection(self):
+    def test_when_response_resources_are_not_valid_and_model_has_parse_method_then_runs_callback_with_error(self):
         self.collection = UsersWithModelParse(self.client)
 
         self.json_collection = escape.json_encode([
@@ -185,41 +219,13 @@ class TestGetEntireCollection(AsyncTestCase):
         self.collection.all(self.stop)
         users, error = self.wait()
 
-        assert_that(not error)
-        assert_that(users, contains(
-            has_properties(id=1, name=u'Foo', email=u'foo@example.com'),
-            has_properties(id=2, name=u'Jack', email=u'jack@example.com')
-        ))
-
-    def test_when_collection_has_not_parse_method_then_runs_callback_with_value_error(self):
-        self.json_collection = escape.json_encode({
-            'users': [
-                {
-                    'id': 1,
-                    'name': 'Foo',
-                    'email': 'foo@example.com'
-                },
-                {
-                    'id': 2,
-                    'name': 'Jack',
-                    'email': 'jack@example.com'
-                }
-            ]
-        })
-
-        self.client.next_response = httplib.OK, self.json_collection
-
-        self.collection.all(self.stop)
-        users, error = self.wait()
-
         assert_that(not users)
-        assert_that(error, instance_of(ValueError))
-        assert_that(error.message, """
-            Response content should be a list.
-            Overwrite the Collection.parse method to create a valid response.
-            """)
 
-    def test_when_collection_has_parse_method_then_runs_callback_with_collection(self):
+        # Exception from booby.Model
+        assert_that(error, instance_of(ValueError))
+        assert_that(error.message, "Invalid field 'url'")
+
+    def test_when_response_is_not_valid_and_collection_has_parse_method_then_runs_callback_with_collection(self):
         self.collection = UsersWithCollectionParse(self.client)
 
         self.json_collection = escape.json_encode({
@@ -227,12 +233,14 @@ class TestGetEntireCollection(AsyncTestCase):
                 {
                     'id': 1,
                     'name': 'Foo',
-                    'email': 'foo@example.com'
+                    'email': 'foo@example.com',
+                    'url': 'http://example.com/Foo'
                 },
                 {
                     'id': 2,
                     'name': 'Jack',
-                    'email': 'jack@example.com'
+                    'email': 'jack@example.com',
+                    'url': 'http://example.com/Jack'
                 }
             ]
         })
