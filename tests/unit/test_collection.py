@@ -13,66 +13,6 @@ import finch
 from finch import Collection, Model, IntegerField, StringField
 
 
-class User(Model):
-    id = IntegerField()
-    name = StringField()
-    email = StringField()
-
-
-class UserWithParse(User):
-    def parse(self, raw):
-        return {
-            'id': raw['id'],
-            'name': raw['name'],
-            'email': raw['email']
-        }
-
-
-class UserWithUrl(User):
-    _url = '/users-resource'
-
-
-class UserWithStaticUrlMethod(User):
-    @staticmethod
-    def _url(id_):
-        return '/users?' + urllib.urlencode({'id': id_})
-
-
-class UserWithEncode(User):
-    def encode(self):
-        return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
-
-
-class Users(Collection):
-    model = User
-    url = '/users'
-
-
-class UsersWithCollectionParse(Users):
-    def parse(self, raw):
-        result = []
-        for user in raw['users']:
-            result.append({
-                'id': user['id'],
-                'name': user['name'],
-                'email': user['email']
-            })
-
-        return result
-
-
-class UsersWithModelParse(Users):
-    model = UserWithParse
-
-
-class UsersWithModelUrl(Users):
-    model = UserWithUrl
-
-
-class UsersWithModelStaticUrlMethod(Users):
-    model = UserWithStaticUrlMethod
-
-
 class TestGetEntireCollection(AsyncTestCase):
     def setup(self):
         self.client = fake_httpclient.HTTPClient()
@@ -466,3 +406,63 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(last_request.url, is_('/users'))
         assert_that(last_request.method, is_('POST'))
+
+
+class User(Model):
+    id = IntegerField()
+    name = StringField()
+    email = StringField()
+
+
+class UserWithParse(User):
+    def parse(self, raw):
+        return {
+            'id': raw['id'],
+            'name': raw['name'],
+            'email': raw['email']
+        }
+
+
+class UserWithUrl(User):
+    _url = '/users-resource'
+
+
+class UserWithStaticUrlMethod(User):
+    @staticmethod
+    def _url(id_):
+        return '/users?' + urllib.urlencode({'id': id_})
+
+
+class UserWithEncode(User):
+    def encode(self):
+        return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
+
+
+class Users(Collection):
+    model = User
+    url = '/users'
+
+
+class UsersWithCollectionParse(Users):
+    def parse(self, raw):
+        result = []
+        for user in raw['users']:
+            result.append({
+                'id': user['id'],
+                'name': user['name'],
+                'email': user['email']
+            })
+
+        return result
+
+
+class UsersWithModelParse(Users):
+    model = UserWithParse
+
+
+class UsersWithModelUrl(Users):
+    model = UserWithUrl
+
+
+class UsersWithModelStaticUrlMethod(Users):
+    model = UserWithStaticUrlMethod
