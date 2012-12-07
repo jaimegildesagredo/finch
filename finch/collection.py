@@ -32,10 +32,10 @@ class Collection(object):
                 callback(None, HTTPError(response.code))
                 return
 
-            # Get raw collection response
-            collection = escape.json_decode(response.body)
             if hasattr(self, 'parse'):
-                collection = self.parse(collection)
+                collection = self.parse(response.body, response.headers)
+            else:
+                collection = escape.json_decode(response.body)
 
             if not isinstance(collection, list):
                 callback(None, ValueError("""
@@ -61,14 +61,15 @@ class Collection(object):
                 callback(None, HTTPError(response.code))
                 return
 
-            raw = escape.json_decode(response.body)
-
             result = self.model()
+
+            if hasattr(result, 'parse'):
+                resource = result.parse(response.body, response.headers)
+            else:
+                resource = escape.json_decode(response.body)
+
             try:
-                if hasattr(result, 'parse'):
-                    result.update(result.parse(raw))
-                else:
-                    result.update(raw)
+                result.update(resource)
             except ValueError as error:
                 # booby.Model error
                 callback(None, error)
@@ -99,13 +100,13 @@ class Collection(object):
                 callback(None, HTTPError(response.code))
                 return
 
-            raw = escape.json_decode(response.body)
+            if hasattr(obj, 'parse'):
+                resource = obj.parse(response.body, response.headers)
+            else:
+                resource = escape.json_decode(response.body)
 
             try:
-                if hasattr(obj, 'parse'):
-                    obj.update(obj.parse(raw))
-                else:
-                    obj.update(raw)
+                obj.update(resource)
             except ValueError as error:
                 callback(None, error)
                 return

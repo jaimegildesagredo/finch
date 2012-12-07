@@ -415,7 +415,9 @@ class User(Model):
 
 
 class UserWithParse(User):
-    def parse(self, raw):
+    def parse(self, body, headers):
+        raw = escape.json_decode(body)
+
         return {
             'id': raw['id'],
             'name': raw['name'],
@@ -444,7 +446,9 @@ class Users(Collection):
 
 
 class UsersWithCollectionParse(Users):
-    def parse(self, raw):
+    def parse(self, body, headers):
+        raw = escape.json_decode(body)
+
         result = []
         for user in raw['users']:
             result.append({

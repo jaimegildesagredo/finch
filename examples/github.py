@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tornado import httpclient, ioloop
+from tornado import httpclient, ioloop, escape
 
 from finch import *
 
@@ -8,19 +8,28 @@ from finch import *
 class Repos(Collection):
     url = 'https://api.github.com/users/jaimegildesagredo/repos'
 
+    def parse(self, body, headers):
+        raw = escape.json_decode(body)
+
+        return [parse_repo(r) for r in raw]
+
     class model(Model):
         id = IntegerField()
         name = StringField()
         owner = StringField()
         private = BoolField()
 
-        def parse(self, raw):
-            return {
-                'id': raw['id'],
-                'name': raw['name'],
-                'owner': raw['owner']['login'],
-                'private': raw['private']
-            }
+        def parse(self, body, headers):
+            return parse_repo(escape.json_decode(body))
+
+
+def parse_repo(raw):
+    return {
+        'id': raw['id'],
+        'name': raw['name'],
+        'owner': raw['owner']['login'],
+        'private': raw['private']
+    }
 
 
 if __name__ == '__main__':

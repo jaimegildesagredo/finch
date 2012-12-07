@@ -29,9 +29,10 @@ class HTTPClient(object):
 
 
 class _HTTPResponse(object):
-    def __init__(self, code, body):
+    def __init__(self, code, body, headers=None):
         self.code = code
         self.body = body
+        self.headers = headers
 
 
 class _HTTPRequest(object):
