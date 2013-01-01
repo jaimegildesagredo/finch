@@ -6,7 +6,6 @@ import httplib
 from tornado import escape
 from hamcrest import *
 
-from tests.matchers import has_properties
 from tests.unit import AsyncTestCase, fake_httpclient
 
 import finch

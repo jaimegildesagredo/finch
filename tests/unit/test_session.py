@@ -4,8 +4,6 @@ from tornado import httpclient
 from hamcrest import *
 from doublex import *
 
-from tests.matchers import has_properties
-
 from finch import Session, auth
 
 
