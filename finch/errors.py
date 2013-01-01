@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2012 Jaime Gil de Sagredo Luna
+# Copyright 2013 Jaime Gil de Sagredo Luna
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from booby import Model, EmbeddedModel, IntegerField, StringField, BoolField
+import httplib
 
-from session import Session
-from collection import Collection
 
-__all__ = [
-    'Session',
-    'Collection',
-    'Model',
-    'EmbeddedModel',
-    'IntegerField',
-    'StringField',
-    'BoolField'
-]
+class FinchError(Exception):
+    pass
+
+
+class HTTPError(FinchError):
+    def __init__(self, code):
+        if code == 599:
+            message = 'Timeout'
+        else:
+            message = httplib.responses[code]
+
+        super(HTTPError, self).__init__(message)
+        self.code = code

@@ -8,8 +8,7 @@ from hamcrest import *
 
 from tests.unit import AsyncTestCase, fake_httpclient
 
-import finch
-from finch import Collection, Model, IntegerField, StringField
+from finch import errors, Collection, Model, IntegerField, StringField
 
 
 class TestGetEntireCollection(AsyncTestCase):
@@ -145,7 +144,7 @@ class TestGetEntireCollection(AsyncTestCase):
         users, error = self.wait()
 
         assert_that(not users)
-        assert_that(error, instance_of(finch.HTTPError))
+        assert_that(error, instance_of(errors.HTTPError))
         assert_that(error, has_property('code', httplib.NOT_FOUND))
 
     def test_when_fetching_collection_then_client_performs_http_get_to_collection_url(self):
@@ -231,7 +230,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         user, error = self.wait()
 
         assert_that(not user)
-        assert_that(error, instance_of(finch.HTTPError))
+        assert_that(error, instance_of(errors.HTTPError))
         assert_that(error, has_property('code', httplib.NOT_FOUND))
 
     def test_when_model_has_not_url_then_client_performs_http_get_using_the_collection_url(self):
@@ -352,7 +351,7 @@ class TestAddModelToCollection(AsyncTestCase):
         user, error = self.wait()
 
         assert_that(not user)
-        assert_that(error, instance_of(finch.HTTPError))
+        assert_that(error, instance_of(errors.HTTPError))
         assert_that(error, has_property('code', httplib.BAD_REQUEST))
 
     def test_when_model_has_not_encode_method_then_client_performs_http_post_with_json_body(self):

@@ -19,6 +19,8 @@ from urllib import splitquery
 
 from tornado import escape
 
+from finch import errors
+
 
 class Collection(object):
     model = None
@@ -29,7 +31,7 @@ class Collection(object):
     def all(self, callback):
         def on_response(response):
             if response.code >= httplib.BAD_REQUEST:
-                callback(None, HTTPError(response.code))
+                callback(None, errors.HTTPError(response.code))
                 return
 
             if hasattr(self, 'parse'):
@@ -58,7 +60,7 @@ class Collection(object):
     def get(self, id_, callback):
         def on_response(response):
             if response.code >= httplib.BAD_REQUEST:
-                callback(None, HTTPError(response.code))
+                callback(None, errors.HTTPError(response.code))
                 return
 
             result = self.model()
@@ -97,7 +99,7 @@ class Collection(object):
     def add(self, obj, callback):
         def on_response(response):
             if response.code >= httplib.BAD_REQUEST:
-                callback(None, HTTPError(response.code))
+                callback(None, errors.HTTPError(response.code))
                 return
 
             if hasattr(obj, 'parse'):
@@ -122,14 +124,3 @@ class Collection(object):
             headers={'Content-Type': content_type},
             body=body,
             callback=on_response)
-
-
-class HTTPError(Exception):
-    def __init__(self, code):
-        if code == 599:
-            message = 'Timeout'
-        else:
-            message = httplib.responses[code]
-
-        super(HTTPError, self).__init__(message)
-        self.code = code
