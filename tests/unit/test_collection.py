@@ -3,6 +3,7 @@
 import urllib
 import httplib
 
+import booby
 from tornado import escape
 from hamcrest import *
 
@@ -73,9 +74,7 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(not users)
 
-        # Exception from booby.Model
-        assert_that(error, instance_of(ValueError))
-        assert_that(error.message, "Invalid field 'url'")
+        assert_that(error, instance_of(booby.errors.FieldError))
 
     def test_when_response_resources_have_extra_fields_and_model_has_parse_method_then_runs_callback_with_error(self):
         self.collection = UsersWithModelParse(self.client)
@@ -102,9 +101,7 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(not users)
 
-        # Exception from booby.Model
-        assert_that(error, instance_of(ValueError))
-        assert_that(error.message, "Invalid field 'url'")
+        assert_that(error, instance_of(booby.errors.FieldError))
 
     def test_when_response_resources_have_extra_fields_but_collection_has_parse_method_then_runs_callback_with_collection(self):
         self.collection = UsersWithCollectionParse(self.client)
@@ -201,9 +198,7 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(not user)
 
-        # Exception from booby.Model
-        assert_that(error, instance_of(ValueError))
-        assert_that(error.message, "Invalid field 'url'")
+        assert_that(error, instance_of(booby.errors.FieldError))
 
     def test_when_response_is_a_json_object_with_extra_fields_but_model_has_parse_method_then_runs_callback_with_model(self):
         self.collection = UsersWithModelParse(self.client)
@@ -321,9 +316,7 @@ class TestAddModelToCollection(AsyncTestCase):
 
         assert_that(not user)
 
-        # Exception from booby.Model
-        assert_that(error, instance_of(ValueError))
-        assert_that(error.message, "Invalid field 'url'")
+        assert_that(error, instance_of(booby.errors.FieldError))
 
     def test_when_response_is_a_json_object_with_extra_fields_but_model_has_parse_method_then_runs_callback_with_model(self):
         self.collection = UsersWithModelParse(self.client)

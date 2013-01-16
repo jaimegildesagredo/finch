@@ -51,8 +51,7 @@ class Collection(object):
 
             try:
                 callback([self.model(**r) for r in collection], None)
-            except ValueError as error:
-                # booby.Model error
+            except Exception as error:
                 callback(None, error)
 
         self.client.fetch(self.url, callback=on_response)
@@ -72,8 +71,7 @@ class Collection(object):
 
             try:
                 result.update(resource)
-            except ValueError as error:
-                # booby.Model error
+            except Exception as error:
                 callback(None, error)
                 return
 
@@ -109,7 +107,7 @@ class Collection(object):
 
             try:
                 obj.update(resource)
-            except ValueError as error:
+            except Exception as error:
                 callback(None, error)
                 return
 
