@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 requirements = open('requirements.txt').read().splitlines()
-long_description = open('README.md').read()
+long_description = open('README.rst').read()
 
 setup(
     name='finch',
