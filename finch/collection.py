@@ -119,12 +119,24 @@ class Collection(object):
                 obj._persisted = True
                 callback(obj, None)
 
+        if getattr(obj, '_persisted', False) is True:
+            url = self._url(self._id(obj))
+            method = 'PUT'
+        else:
+            url = self.url
+            method = 'POST'
+
         if hasattr(obj, 'encode'):
             body, content_type = obj.encode()
         else:
             body, content_type = escape.json_encode(obj.to_dict()), 'application/json'
 
-        self.client.fetch(self.url, method='POST',
+        self.client.fetch(url, method=method,
             headers={'Content-Type': content_type},
             body=body,
             callback=on_response)
+
+    def _id(self, obj):
+        for name, field in obj._fields.items():
+            if field.options.get('primary', False):
+                return getattr(obj, name)

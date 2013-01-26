@@ -259,7 +259,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(last_request.url, is_('/users/1'))
         assert_that(last_request.method, is_('GET'))
 
-    def test_when_model_has_url_attribute_then_client_performs_http_get_using_the_model_url(self):
+    def test_when_model_has_url_attribute_then_client_performs_http_request_with_model_url(self):
         self.collection = UsersWithModelUrl(self.client)
 
         self.client.next_response = httplib.OK, self.json_model
@@ -269,9 +269,8 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(self.client.last_request.url, is_('/users-resource/1'))
 
-    def test_when_model_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
-        self.collection = UsersWithModelUrl(self.client)
-        self.collection.model._url += '?type=json'
+    def test_when_model_url_contains_query_params_then_client_performs_http_request_with_correct_url(self):
+        self.collection = UsersWithModelUrlQuery(self.client)
 
         self.client.next_response = httplib.OK, self.json_model
 
@@ -280,7 +279,7 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(self.client.last_request.url, is_('/users-resource/1?type=json'))
 
-    def test_when_model_has_static_url_method_then_client_performs_http_get_with_returned_url(self):
+    def test_when_model_has_static_url_method_then_client_performs_http_request_with_returned_url(self):
         self.collection = UsersWithModelStaticUrlMethod(self.client)
 
         self.client.next_response = httplib.OK, self.json_model
@@ -290,7 +289,7 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(self.client.last_request.url, is_('/users?id=1'))
 
-    def test_when_collection_url_contains_query_params_then_client_performs_http_get_with_correct_url(self):
+    def test_when_collection_url_contains_query_params_then_client_performs_http_request_with_correct_url(self):
         self.collection.url += '?type=json'
 
         self.client.next_response = httplib.OK, self.json_model
@@ -311,7 +310,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         })
 
 
-class TestAddModelToCollection(AsyncTestCase):
+class AddModelMixin(object):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
@@ -377,7 +376,7 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(error, instance_of(errors.HTTPError))
         assert_that(error, has_property('code', httplib.BAD_REQUEST))
 
-    def test_when_model_has_not_encode_method_then_client_performs_http_post_with_json_body(self):
+    def test_when_model_has_not_encode_method_then_client_performs_http_request_with_json_body(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
         expected_body = escape.json_encode(self.user.to_dict())
@@ -390,7 +389,7 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(last_request.body, is_(expected_body))
         assert_that(last_request.headers, has_entry('Content-Type', 'application/json'))
 
-    def test_when_model_has_encode_method_then_client_performs_http_post_with_custom_body_and_content_type(self):
+    def test_when_model_has_encode_method_then_client_performs_http_request_with_custom_body_and_content_type(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
         self.user = UserWithEncode(name='Foo', email='foo@example.com')
@@ -405,7 +404,9 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(last_request.body, is_(expected_body))
         assert_that(last_request.headers, has_entry('Content-Type', 'application/x-www-form-urlencoded'))
 
-    def test_when_creating_model_then_client_performs_http_post(self):
+
+class TestAddNewModelToCollection(AddModelMixin, AsyncTestCase):
+    def test_when_creating_model_then_client_performs_http_post_to_collection_url(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
@@ -429,8 +430,70 @@ class TestAddModelToCollection(AsyncTestCase):
         })
 
 
+class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
+    def test_when_model_has_not_url_then_client_performs_http_put_to_model_url(self):
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        last_request = self.client.last_request
+
+        assert_that(last_request.url, is_('/users/1'))
+        assert_that(last_request.method, is_('PUT'))
+
+    def test_when_model_has_url_attribute_then_client_performs_http_request_with_model_url(self):
+        self.collection = UsersWithModelUrl(self.client)
+        self.user = UserWithUrl(id=1, name='Foo', email='foo@example.com')
+        self.user._persisted = True
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users-resource/1'))
+
+    def test_when_model_url_contains_query_params_then_client_performs_http_request_with_correct_url(self):
+        self.collection = UsersWithModelUrlQuery(self.client)
+        self.user = UserWithUrlQuery(id=1, name='Foo', email='foo@example.com')
+        self.user._persisted = True
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users-resource/1?type=json'))
+
+    def test_when_model_has_static_url_method_then_client_performs_http_request_with_returned_url(self):
+        self.collection = UsersWithModelStaticUrlMethod(self.client)
+        self.user = UserWithUrl(id=1, name='Foo', email='foo@example.com')
+        self.user._persisted = True
+
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        self.wait()
+
+        assert_that(self.client.last_request.url, is_('/users?id=1'))
+
+    def setup(self):
+        self.client = fake_httpclient.HTTPClient()
+        self.collection = Users(self.client)
+
+        self.user = User(id=1, name='Foo', email='foo@example.com')
+        self.user._persisted = True
+
+        self.json_model = escape.json_encode({
+            'id': 1,
+            'name': 'Foo',
+            'email': 'foo@example.com'
+        })
+
+
 class User(Model):
-    id = IntegerField()
+    id = IntegerField(primary=True)
     name = StringField()
     email = StringField()
 
@@ -450,6 +513,10 @@ class UserWithUrl(User):
     _url = '/users-resource'
 
 
+class UserWithUrlQuery(User):
+    _url = '/users-resource?type=json'
+
+
 class UserWithStaticUrlMethod(User):
     @staticmethod
     def _url(id_):
@@ -459,6 +526,10 @@ class UserWithStaticUrlMethod(User):
 class UserWithEncode(User):
     def encode(self):
         return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
+
+
+class UserWithoutPrimary(User):
+    id = IntegerField()
 
 
 class Users(Collection):
@@ -489,5 +560,13 @@ class UsersWithModelUrl(Users):
     model = UserWithUrl
 
 
+class UsersWithModelUrlQuery(Users):
+    model = UserWithUrlQuery
+
+
 class UsersWithModelStaticUrlMethod(Users):
     model = UserWithStaticUrlMethod
+
+
+class UsersWithoutPrimary(Users):
+    model = UserWithoutPrimary
