@@ -49,7 +49,7 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(not users)
         assert_that(error, instance_of(ValueError))
         assert_that(error.message, contains_string(
-            "Response body should be a json array."))
+            "The response body was expected to be a JSON array."))
 
     def test_when_response_resources_have_extra_fields_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
         self.json_collection = escape.json_encode([

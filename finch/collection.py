@@ -41,12 +41,11 @@ class Collection(object):
 
             if not isinstance(collection, list):
                 callback(None, ValueError("""
-                    Response body should be a json array.
+                    The response body was expected to be a JSON array.
 
-                    To properly process the response you can add a `parse(raw)`
-                    method to your collection class.
+                    To properly process the response you should define a
+                    `parse(raw)` method in your `Collection` class."""))
 
-                    """))
                 return
 
             try:
