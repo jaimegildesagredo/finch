@@ -25,6 +25,17 @@ class TestGetEntireCollection(AsyncTestCase):
             has_properties(id=2, name=u'Jack', email=u'jack@example.com')
         ))
 
+    def test_when_response_is_ok_then_runs_callback_with_persisted_objects_in_collection(self):
+        self.client.next_response = httplib.OK, self.json_collection
+
+        self.collection.all(self.stop)
+        users, error = self.wait()
+
+        assert_that(not error)
+        assert_that(users, contains(
+            has_property('_persisted', True),
+            has_property('_persisted', True)))
+
     def test_when_response_is_not_a_json_array_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
         self.json_collection = escape.json_encode({
             'users': [
@@ -183,6 +194,15 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(not error)
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
+    def test_when_response_is_ok_then_runs_callback_with_persisted_model(self):
+        self.client.next_response = httplib.OK, self.json_model
+
+        self.collection.get(1, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user, has_property('_persisted', True))
+
     def test_when_response_is_a_json_object_with_extra_fields_but_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
             'id': 1,
@@ -299,7 +319,17 @@ class TestAddModelToCollection(AsyncTestCase):
         user, error = self.wait()
 
         assert_that(not error)
+        assert_that(user, is_(self.user))
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
+
+    def test_when_response_is_ok_then_runs_callback_with_persisted_model(self):
+        self.client.next_response = httplib.CREATED, self.json_model
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user, has_property('_persisted', True))
 
     def test_when_response_is_a_json_object_with_extra_fields_and_model_has_not_parse_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
@@ -360,7 +390,7 @@ class TestAddModelToCollection(AsyncTestCase):
         assert_that(last_request.body, is_(expected_body))
         assert_that(last_request.headers, has_entry('Content-Type', 'application/json'))
 
-    def test_when_model_has_encode_method_then_client_performs_http_post_with_custom_body(self):
+    def test_when_model_has_encode_method_then_client_performs_http_post_with_custom_body_and_content_type(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
         self.user = UserWithEncode(name='Foo', email='foo@example.com')

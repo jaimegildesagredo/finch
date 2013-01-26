@@ -48,10 +48,17 @@ class Collection(object):
 
                 return
 
+            result = []
+
             try:
-                callback([self.model(**r) for r in collection], None)
+                for r in collection:
+                    obj = self.model(**r)
+                    obj._persisted = True
+                    result.append(obj)
             except Exception as error:
                 callback(None, error)
+            else:
+                callback(result, None)
 
         self.client.fetch(self.url, callback=on_response)
 
@@ -72,9 +79,9 @@ class Collection(object):
                 result.update(resource)
             except Exception as error:
                 callback(None, error)
-                return
-
-            callback(result, None)
+            else:
+                result._persisted = True
+                callback(result, None)
 
         self.client.fetch(self._url(id_), callback=on_response)
 
@@ -108,9 +115,9 @@ class Collection(object):
                 obj.update(resource)
             except Exception as error:
                 callback(None, error)
-                return
-
-            callback(obj, None)
+            else:
+                obj._persisted = True
+                callback(obj, None)
 
         if hasattr(obj, 'encode'):
             body, content_type = obj.encode()
