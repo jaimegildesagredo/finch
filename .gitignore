@@ -3,3 +3,4 @@
 *.py[co]
 build/
 dist/
+.coverage

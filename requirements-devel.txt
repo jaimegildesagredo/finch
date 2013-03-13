@@ -3,3 +3,4 @@ nose
 pyhamcrest
 behave
 doublex
+coverage==3.6
