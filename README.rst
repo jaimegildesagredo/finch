@@ -31,10 +31,10 @@ To start consuming a REST API you first should define the resources you are goin
     class Repos(Collection):
         model = Repo
 
-        def __init__(self, username, \*args, \*\*kwargs):
+        def __init__(self, username, *args, **kwargs):
             self.username = username
 
-            super(Repos, self).__init__(\*args, \*\*kwargs)
+            super(Repos, self).__init__(*args, **kwargs)
 
         @property
         def url(self):
