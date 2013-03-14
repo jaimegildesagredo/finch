@@ -91,4 +91,4 @@ To run the Finch tests suite you should install the development requirements and
 Status
 ======
 
-Finch is under active development and there is not documentation yet. By the moment you can read the examples in this repository and read the tests, that are the most up to date documentation. Also I'm working on create a complete API client using Finch and create a good documentation.
+Finch is under active development and there is not a complete documentation yet. By the moment you can read the examples in this repository and read the tests, that are the most up to date documentation. Also I'm working on create a complete API client using Finch and create a good documentation.
