@@ -17,7 +17,7 @@ class Repos(Collection):
         id = IntegerField()
         name = StringField()
         owner = StringField()
-        private = BoolField()
+        private = BooleanField()
 
         def parse(self, body, headers):
             return parse_repo(escape.json_decode(body))
