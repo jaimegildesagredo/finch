@@ -43,6 +43,15 @@ To start consuming a REST API you first should define the resources you are goin
         def parse(self, body, headers):
             return [parse_repo(r) for r in json.loads(body)]
 
+
+    def parse_repo(raw):
+        return {
+            'id': raw['id'],
+            'name': raw['name'],
+            'owner': raw['owner']['login'],
+            'is_private': raw['private']
+        }
+
 Now you can fetch your public repos (and also your private repos if you're authenticated).
 
 .. code-block:: python
