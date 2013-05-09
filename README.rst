@@ -85,7 +85,7 @@ Also you can install the latest sources from Github.
 
 .. code-block:: bash
 
-    $ pip install -r git+git://github.com/jaimegildesagredo/finch.git#egg=finch
+    $ pip install -e git+git://github.com/jaimegildesagredo/finch.git#egg=finch
 
 Tests
 =====
