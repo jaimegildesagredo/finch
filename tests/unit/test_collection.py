@@ -4,12 +4,13 @@ import urllib
 import httplib
 
 import booby
+from booby import Model, fields
 from tornado import escape
 from hamcrest import *
 
 from tests.unit import AsyncTestCase, fake_httpclient
 
-from finch import errors, Collection, Model, IntegerField, StringField
+from finch import errors, Collection
 
 
 class TestGetEntireCollection(AsyncTestCase):
@@ -349,7 +350,7 @@ class AddModelMixin(object):
 
     def test_when_response_is_a_json_object_with_extra_fields_but_model_has_parse_method_then_runs_callback_with_model(self):
         self.collection = UsersWithModelParse(self.client)
-        self.user = self.collection.model(**self.user.to_dict())
+        self.user = self.collection.model(**dict(self.user))
 
         self.json_model = escape.json_encode({
             'id': 1,
@@ -379,7 +380,7 @@ class AddModelMixin(object):
     def test_when_model_has_not_encode_method_then_client_performs_http_request_with_json_body(self):
         self.client.next_response = httplib.CREATED, self.json_model
 
-        expected_body = escape.json_encode(self.user.to_dict())
+        expected_body = escape.json_encode(dict(self.user))
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -394,7 +395,7 @@ class AddModelMixin(object):
 
         self.user = UserWithEncode(name='Foo', email='foo@example.com')
 
-        expected_body = urllib.urlencode(self.user.to_dict())
+        expected_body = urllib.urlencode(dict(self.user))
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -493,9 +494,9 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
 
 
 class User(Model):
-    id = IntegerField(primary=True)
-    name = StringField()
-    email = StringField()
+    id = fields.Integer(primary=True)
+    name = fields.String()
+    email = fields.String()
 
 
 class UserWithParse(User):
@@ -525,11 +526,11 @@ class UserWithStaticUrlMethod(User):
 
 class UserWithEncode(User):
     def encode(self):
-        return urllib.urlencode(self.to_dict()), 'application/x-www-form-urlencoded'
+        return urllib.urlencode(dict(self)), 'application/x-www-form-urlencoded'
 
 
 class UserWithoutPrimary(User):
-    id = IntegerField()
+    id = fields.Integer()
 
 
 class Users(Collection):

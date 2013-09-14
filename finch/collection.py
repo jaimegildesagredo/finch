@@ -129,7 +129,7 @@ class Collection(object):
         if hasattr(obj, 'encode'):
             body, content_type = obj.encode()
         else:
-            body, content_type = escape.json_encode(obj.to_dict()), 'application/json'
+            body, content_type = escape.json_encode(dict(obj)), 'application/json'
 
         self.client.fetch(url, method=method,
             headers={'Content-Type': content_type},
