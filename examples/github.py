@@ -2,17 +2,17 @@
 
 import json
 
-from booby import Model, StringField, IntegerField, BooleanField
+from booby import Model, fields
 from finch import Collection
 
 from tornado import httpclient, ioloop
 
 
 class Repo(Model):
-    id = IntegerField()
-    name = StringField()
-    owner = StringField()
-    is_private = BooleanField()
+    id = fields.Integer()
+    name = fields.String()
+    owner = fields.String()
+    is_private = fields.Boolean()
 
     def parse(self, body, headers):
         return parse_repo(json.loads(body))

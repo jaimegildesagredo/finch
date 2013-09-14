@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from booby import Model, EmbeddedField, IntegerField, StringField, BooleanField
+from booby import Model, fields
 
 from session import Session
 from collection import Collection
@@ -23,8 +23,5 @@ __all__ = [
     'Session',
     'Collection',
     'Model',
-    'EmbeddedField',
-    'IntegerField',
-    'StringField',
-    'BooleanField'
+    'fields'
 ]
