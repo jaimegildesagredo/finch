@@ -4,13 +4,13 @@ from behave import given
 from tornado import httpclient
 
 from finch import Session, Collection
-from booby import Model, IntegerField, StringField
+from booby import Model, fields
 
 
 class Users(Collection):
     class model(Model):
-        id = IntegerField()
-        name = StringField()
+        id = fields.Integer()
+        name = fields.String()
 
     url = 'http://localhost:3000/users'
 
