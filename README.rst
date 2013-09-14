@@ -13,14 +13,14 @@ To start consuming a REST API you first should define the resources you are goin
 
 .. code-block:: python
 
-    from booby import Model, StringField, IntegerField, BooleanField
+    from booby import Model, fields
     from finch import Collection
 
     class Repo(Model):
-        id = IntegerField()
-        name = StringField()
-        owner = StringField()
-        is_private = BooleanField()
+        id = fields.Integer()
+        name = fields.String()
+        owner = fields.String()
+        is_private = fields.Boolean()
 
         def parse(self, body, headers):
             return parse_repo(json.loads(body))
