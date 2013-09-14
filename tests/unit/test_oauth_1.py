@@ -18,7 +18,7 @@ class TestOAuth1(object):
             resource_owner_secret=u'4VqKRi3hL9g0Ol3qnVR7'
         )
 
-        request = httpclient.HTTPRequest('/test')
+        request = httpclient.HTTPRequest('http://example.com/test')
 
         auth(request)
 
