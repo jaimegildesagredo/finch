@@ -90,11 +90,11 @@ Also you can install the latest sources from Github.
 Tests
 =====
 
-To run the Finch tests suite you should install the development requirements and run nosetests.
+To run the Finch tests suite you should install the test requirements and run nosetests.
 
 .. code-block:: bash
 
-    $ pip install -r requirements-devel.txt
+    $ pip install -r test-requirements.txt
     $ nosetests tests/unit
 
 Status
