@@ -1,7 +1,7 @@
 Finch: RESTful API consumer
 ===========================
 
-.. image:: https://secure.travis-ci.org/jaimegildesagredo/finch.png?branch=master
+.. image:: https://secure.travis-ci.org/jaimegildesagredo/finch.svg?branch=master
     :target: http://travis-ci.org/jaimegildesagredo/finch
 
 Finch is an asynchronous `RESTful API` consumer for Python. Finch is focused on remove all of the boilerplate related to consuming http based APIs and provide a high level abstraction to develop API clients. Finch is released under the `Apache 2 license <http://www.apache.org/licenses/LICENSE-2.0.html>`_, so you can `fork <https://github.com/jaimegildesagredo/finch>`_, `contribute <https://github.com/jaimegildesagredo/finch/pulls>`_ and also `report errors and suggestions <https://github.com/jaimegildesagredo/finch/issues>`_ to improve it.
