@@ -35,7 +35,7 @@ class Collection(object):
                 return
 
             if hasattr(self, 'decode'):
-                collection = self.decode(response.body, response.headers)
+                collection = self.decode(response)
             else:
                 collection = escape.json_decode(response.body)
 
@@ -71,7 +71,7 @@ class Collection(object):
             result = self.model()
 
             if hasattr(result, 'decode'):
-                resource = result.decode(response.body, response.headers)
+                resource = result.decode(response)
             else:
                 resource = escape.json_decode(response.body)
 
@@ -107,7 +107,7 @@ class Collection(object):
                 return
 
             if hasattr(obj, 'decode'):
-                resource = obj.decode(response.body, response.headers)
+                resource = obj.decode(response)
             else:
                 resource = escape.json_decode(response.body)
 

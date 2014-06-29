@@ -14,8 +14,8 @@ class Repo(Model):
     owner = fields.String()
     is_private = fields.Boolean()
 
-    def decode(self, body, headers):
-        return parse_repo(json.loads(body))
+    def decode(self, response):
+        return parse_repo(json.loads(response.body))
 
     def __repr__(self):
         return 'Repo({}/{})'.format(self.owner, self.name)
@@ -33,8 +33,8 @@ class Repos(Collection):
     def url(self):
         return 'https://api.github.com/users/{}/repos'.format(self.username)
 
-    def decode(self, body, headers):
-        return [parse_repo(r) for r in json.loads(body)]
+    def decode(self, response):
+        return [parse_repo(r) for r in json.loads(response.body)]
 
 
 def parse_repo(raw):

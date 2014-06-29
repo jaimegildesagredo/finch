@@ -500,8 +500,8 @@ class User(Model):
 
 
 class UserWithDecode(User):
-    def decode(self, body, headers):
-        raw = escape.json_decode(body)
+    def decode(self, response):
+        raw = escape.json_decode(response.body)
 
         return {
             'id': raw['id'],
@@ -539,8 +539,8 @@ class Users(Collection):
 
 
 class UsersWithCollectionDecode(Users):
-    def decode(self, body, headers):
-        raw = escape.json_decode(body)
+    def decode(self, response):
+        raw = escape.json_decode(response.body)
 
         result = []
         for user in raw['users']:
