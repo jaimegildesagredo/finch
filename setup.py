@@ -7,7 +7,7 @@ long_description = open('README.rst').read()
 
 setup(
     name='finch',
-    version='0.3.3',
+    version='0.4.0',
     description='Asynchronous RESTful API consumer for Python',
     long_description=long_description,
     author='Jaime Gil de Sagredo Luna',
