@@ -2,10 +2,7 @@ language: python
 
 install:
  - python setup.py sdist
- - mkdir tmp
- - tar xvf dist/finch-*.tar.gz -C tmp
- - python tmp/finch-*/setup.py install
-
+ - pip install dist/finch-`python setup.py --version`.tar.gz
  - pip install -r test-requirements.txt
 
 script:
