@@ -34,8 +34,8 @@ class Collection(object):
                 callback(None, errors.HTTPError(response.code))
                 return
 
-            if hasattr(self, 'parse'):
-                collection = self.parse(response.body, response.headers)
+            if hasattr(self, 'decode'):
+                collection = self.decode(response.body, response.headers)
             else:
                 collection = escape.json_decode(response.body)
 
@@ -44,7 +44,7 @@ class Collection(object):
                     The response body was expected to be a JSON array.
 
                     To properly process the response you should define a
-                    `parse(raw)` method in your `Collection` class."""))
+                    `decode(raw)` method in your `Collection` class."""))
 
                 return
 
@@ -70,8 +70,8 @@ class Collection(object):
 
             result = self.model()
 
-            if hasattr(result, 'parse'):
-                resource = result.parse(response.body, response.headers)
+            if hasattr(result, 'decode'):
+                resource = result.decode(response.body, response.headers)
             else:
                 resource = escape.json_decode(response.body)
 
@@ -106,8 +106,8 @@ class Collection(object):
                 callback(None, errors.HTTPError(response.code))
                 return
 
-            if hasattr(obj, 'parse'):
-                resource = obj.parse(response.body, response.headers)
+            if hasattr(obj, 'decode'):
+                resource = obj.decode(response.body, response.headers)
             else:
                 resource = escape.json_decode(response.body)
 

@@ -37,7 +37,7 @@ class TestGetEntireCollection(AsyncTestCase):
             has_property('_persisted', True),
             has_property('_persisted', True)))
 
-    def test_when_response_is_not_a_json_array_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
+    def test_when_response_is_not_a_json_array_and_collection_has_not_decode_method_then_runs_callback_with_error(self):
         self.json_collection = escape.json_encode({
             'users': [
                 {
@@ -63,7 +63,7 @@ class TestGetEntireCollection(AsyncTestCase):
         assert_that(error.message, contains_string(
             "The response body was expected to be a JSON array."))
 
-    def test_when_response_resources_have_extra_fields_and_collection_has_not_parse_method_then_runs_callback_with_error(self):
+    def test_when_response_resources_have_extra_fields_and_collection_has_not_decode_method_then_runs_callback_with_error(self):
         self.json_collection = escape.json_encode([
             {
                 'id': 1,
@@ -88,8 +88,8 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(error, instance_of(booby.errors.FieldError))
 
-    def test_when_response_resources_have_extra_fields_and_model_has_parse_method_then_runs_callback_with_error(self):
-        self.collection = UsersWithModelParse(self.client)
+    def test_when_response_resources_have_extra_fields_and_model_has_decode_method_then_runs_callback_with_error(self):
+        self.collection = UsersWithModelDecode(self.client)
 
         self.json_collection = escape.json_encode([
             {
@@ -115,8 +115,8 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(error, instance_of(booby.errors.FieldError))
 
-    def test_when_response_resources_have_extra_fields_but_collection_has_parse_method_then_runs_callback_with_collection(self):
-        self.collection = UsersWithCollectionParse(self.client)
+    def test_when_response_resources_have_extra_fields_but_collection_has_decode_method_then_runs_callback_with_collection(self):
+        self.collection = UsersWithCollectionDecode(self.client)
 
         self.json_collection = escape.json_encode({
             'users': [
@@ -204,7 +204,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(not error)
         assert_that(user, has_property('_persisted', True))
 
-    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_not_parse_method_then_runs_callback_with_value_error(self):
+    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_not_decode_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
             'id': 1,
             'name': 'Foo',
@@ -221,8 +221,8 @@ class TestGetModelFromCollection(AsyncTestCase):
 
         assert_that(error, instance_of(booby.errors.FieldError))
 
-    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_parse_method_then_runs_callback_with_model(self):
-        self.collection = UsersWithModelParse(self.client)
+    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_decode_method_then_runs_callback_with_model(self):
+        self.collection = UsersWithModelDecode(self.client)
 
         self.json_model = escape.json_encode({
             'id': 1,
@@ -331,7 +331,7 @@ class AddModelMixin(object):
         assert_that(not error)
         assert_that(user, has_property('_persisted', True))
 
-    def test_when_response_is_a_json_object_with_extra_fields_and_model_has_not_parse_method_then_runs_callback_with_value_error(self):
+    def test_when_response_is_a_json_object_with_extra_fields_and_model_has_not_decode_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
             'id': 1,
             'name': 'Foo',
@@ -348,8 +348,8 @@ class AddModelMixin(object):
 
         assert_that(error, instance_of(booby.errors.FieldError))
 
-    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_parse_method_then_runs_callback_with_model(self):
-        self.collection = UsersWithModelParse(self.client)
+    def test_when_response_is_a_json_object_with_extra_fields_but_model_has_decode_method_then_runs_callback_with_model(self):
+        self.collection = UsersWithModelDecode(self.client)
         self.user = self.collection.model(**dict(self.user))
 
         self.json_model = escape.json_encode({
@@ -499,8 +499,8 @@ class User(Model):
     email = fields.String()
 
 
-class UserWithParse(User):
-    def parse(self, body, headers):
+class UserWithDecode(User):
+    def decode(self, body, headers):
         raw = escape.json_decode(body)
 
         return {
@@ -538,8 +538,8 @@ class Users(Collection):
     url = '/users'
 
 
-class UsersWithCollectionParse(Users):
-    def parse(self, body, headers):
+class UsersWithCollectionDecode(Users):
+    def decode(self, body, headers):
         raw = escape.json_decode(body)
 
         result = []
@@ -553,8 +553,8 @@ class UsersWithCollectionParse(Users):
         return result
 
 
-class UsersWithModelParse(Users):
-    model = UserWithParse
+class UsersWithModelDecode(Users):
+    model = UserWithDecode
 
 
 class UsersWithModelUrl(Users):

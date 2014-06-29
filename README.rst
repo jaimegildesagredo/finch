@@ -30,7 +30,7 @@ To start consuming a REST API you first should define the resources you are goin
         owner = fields.String()
         is_private = fields.Boolean()
 
-        def parse(self, body, headers):
+        def decode(self, body, headers):
             return parse_repo(json.loads(body))
 
         def __repr__(self):
@@ -48,7 +48,7 @@ To start consuming a REST API you first should define the resources you are goin
         def url(self):
             return 'https://api.github.com/users/{}/repos'.format(self.username)
 
-        def parse(self, body, headers):
+        def decode(self, body, headers):
             return [parse_repo(r) for r in json.loads(body)]
 
 
