@@ -1,6 +1,14 @@
 Finch: RESTful API consumer
 ===========================
 
+.. image:: http://img.shields.io/pypi/v/finch.svg
+    :target: https://pypi.python.org/pypi/finch
+    :alt: Latest version
+
+.. image:: http://img.shields.io/pypi/dm/finch.svg
+    :target: https://pypi.python.org/pypi/finch
+    :alt: Number of PyPI downloads
+
 .. image:: https://secure.travis-ci.org/jaimegildesagredo/finch.svg?branch=master
     :target: http://travis-ci.org/jaimegildesagredo/finch
 
