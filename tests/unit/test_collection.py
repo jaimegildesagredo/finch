@@ -493,6 +493,42 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
         })
 
 
+class TestDelete(AsyncTestCase):
+    def test_should_perform_http_delete_to_resource_url(self):
+        self.client.next_response = httplib.NO_CONTENT, ''
+
+        self.collection.delete(self.user, self.stop)
+        self.wait()
+
+        last_request = self.client.last_request
+
+        assert_that(last_request.url, is_('/users/1'))
+        assert_that(last_request.method, is_('DELETE'))
+
+    def test_should_run_callback_with_error_if_failed_to_perform_delete(self):
+        self.client.next_response = httplib.INTERNAL_SERVER_ERROR, 'Internal Server Error'
+
+        self.collection.delete(self.user, self.stop)
+        error = self.wait()[0]
+
+        assert_that(error, instance_of(errors.HTTPError))
+
+    def test_should_run_callback_with_none_if_sucessfuly_deleted(self):
+        self.client.next_response = httplib.NO_CONTENT, ''
+
+        self.collection.delete(self.user, self.stop)
+        error = self.wait()[0]
+
+        assert_that(error, is_(None))
+
+    def setup(self):
+        self.client = fake_httpclient.HTTPClient()
+        self.collection = Users(self.client)
+
+        self.user = User(id=1, name='Foo', email='foo@example.com')
+        self.user._persisted = True
+
+
 class User(Model):
     id = fields.Integer(primary=True)
     name = fields.String()

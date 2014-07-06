@@ -121,6 +121,11 @@ class Collection(object):
             body=body,
             callback=partial(self.on_add, callback, obj))
 
+    def _id(self, obj):
+        for name, field in obj._fields.items():
+            if field.options.get('primary', False):
+                return getattr(obj, name)
+
     def on_add(self, callback, obj, response):
         if response.code >= httplib.BAD_REQUEST:
             callback(None, errors.HTTPError(response.code))
@@ -139,7 +144,15 @@ class Collection(object):
             obj._persisted = True
             callback(obj, None)
 
-    def _id(self, obj):
-        for name, field in obj._fields.items():
-            if field.options.get('primary', False):
-                return getattr(obj, name)
+    def delete(self, obj, callback):
+        self.client.fetch(
+            self._url(self._id(obj)),
+            method='DELETE',
+            callback=partial(self.on_delete, callback))
+
+    def on_delete(self, callback, response):
+        if response.code >= httplib.BAD_REQUEST:
+            callback(errors.HTTPError(response.code))
+            return
+
+        callback(None)
