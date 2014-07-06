@@ -30,6 +30,9 @@ class Collection(object):
         self.client = client
 
     def all(self, callback):
+        self.request_all(callback)
+
+    def request_all(self, callback):
         self.client.fetch(self.url, callback=partial(self.on_all, callback))
 
     def on_all(self, callback, response):
@@ -64,6 +67,9 @@ class Collection(object):
             callback(result, None)
 
     def get(self, id_, callback):
+        self.request_get(id_, callback)
+
+    def request_get(self, id_, callback):
         self.client.fetch(self._url(id_), callback=partial(self.on_get, callback))
 
     def on_get(self, callback, response):
@@ -102,6 +108,9 @@ class Collection(object):
         return url
 
     def add(self, obj, callback):
+        self.request_add(obj, callback)
+
+    def request_add(self, obj, callback):
         if getattr(obj, '_persisted', False) is True:
             url = self._url(self._id(obj))
             method = 'PUT'
@@ -145,6 +154,9 @@ class Collection(object):
             callback(obj, None)
 
     def delete(self, obj, callback):
+        self.request_delete(obj, callback)
+
+    def request_delete(self, obj, callback):
         self.client.fetch(
             self._url(self._id(obj)),
             method='DELETE',
