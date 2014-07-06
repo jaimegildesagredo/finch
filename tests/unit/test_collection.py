@@ -432,7 +432,7 @@ class TestAddNewModelToCollection(AddModelMixin, AsyncTestCase):
 
 
 class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
-    def test_when_model_has_not_url_then_client_performs_http_put_to_model_url(self):
+    def test_when_model_has_not_url_then_client_performs_http_put_to_collection_url(self):
         self.client.next_response = httplib.OK, self.json_model
 
         self.collection.add(self.user, self.stop)
