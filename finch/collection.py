@@ -18,6 +18,7 @@ import httplib
 from urllib import splitquery
 from functools import partial
 
+import booby.inspection
 from tornado import escape
 
 from finch import errors
@@ -131,7 +132,7 @@ class Collection(object):
             callback=partial(self.on_add, callback, obj))
 
     def _id(self, obj):
-        for name, field in obj._fields.items():
+        for name, field in booby.inspection.get_fields(obj).items():
             if field.options.get('primary', False):
                 return getattr(obj, name)
 
