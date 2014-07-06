@@ -16,6 +16,7 @@
 
 import httplib
 from urllib import splitquery
+from functools import partial
 
 from tornado import escape
 
@@ -29,61 +30,61 @@ class Collection(object):
         self.client = client
 
     def all(self, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(None, errors.HTTPError(response.code))
-                return
+        self.client.fetch(self.url, callback=partial(self.on_all, callback))
 
-            if hasattr(self, 'decode'):
-                collection = self.decode(response)
-            else:
-                collection = escape.json_decode(response.body)
+    def on_all(self, callback, response):
+        if response.code >= httplib.BAD_REQUEST:
+            callback(None, errors.HTTPError(response.code))
+            return
 
-            if not isinstance(collection, list):
-                callback(None, ValueError("""
-                    The response body was expected to be a JSON array.
+        if hasattr(self, 'decode'):
+            collection = self.decode(response)
+        else:
+            collection = escape.json_decode(response.body)
 
-                    To properly process the response you should define a
-                    `decode(raw)` method in your `Collection` class."""))
+        if not isinstance(collection, list):
+            callback(None, ValueError("""
+                The response body was expected to be a JSON array.
 
-                return
+                To properly process the response you should define a
+                `decode(raw)` method in your `Collection` class."""))
 
-            result = []
+            return
 
-            try:
-                for r in collection:
-                    obj = self.model(**r)
-                    obj._persisted = True
-                    result.append(obj)
-            except Exception as error:
-                callback(None, error)
-            else:
-                callback(result, None)
+        result = []
 
-        self.client.fetch(self.url, callback=on_response)
+        try:
+            for r in collection:
+                obj = self.model(**r)
+                obj._persisted = True
+                result.append(obj)
+        except Exception as error:
+            callback(None, error)
+        else:
+            callback(result, None)
 
     def get(self, id_, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(None, errors.HTTPError(response.code))
-                return
+        self.client.fetch(self._url(id_), callback=partial(self.on_get, callback))
 
-            result = self.model()
+    def on_get(self, callback, response):
+        if response.code >= httplib.BAD_REQUEST:
+            callback(None, errors.HTTPError(response.code))
+            return
 
-            if hasattr(result, 'decode'):
-                resource = result.decode(response)
-            else:
-                resource = escape.json_decode(response.body)
+        result = self.model()
 
-            try:
-                result.update(resource)
-            except Exception as error:
-                callback(None, error)
-            else:
-                result._persisted = True
-                callback(result, None)
+        if hasattr(result, 'decode'):
+            resource = result.decode(response)
+        else:
+            resource = escape.json_decode(response.body)
 
-        self.client.fetch(self._url(id_), callback=on_response)
+        try:
+            result.update(resource)
+        except Exception as error:
+            callback(None, error)
+        else:
+            result._persisted = True
+            callback(result, None)
 
     def _url(self, id_):
         url = getattr(self.model, '_url', self.url)
@@ -101,24 +102,6 @@ class Collection(object):
         return url
 
     def add(self, obj, callback):
-        def on_response(response):
-            if response.code >= httplib.BAD_REQUEST:
-                callback(None, errors.HTTPError(response.code))
-                return
-
-            if hasattr(obj, 'decode'):
-                resource = obj.decode(response)
-            else:
-                resource = escape.json_decode(response.body)
-
-            try:
-                obj.update(resource)
-            except Exception as error:
-                callback(None, error)
-            else:
-                obj._persisted = True
-                callback(obj, None)
-
         if getattr(obj, '_persisted', False) is True:
             url = self._url(self._id(obj))
             method = 'PUT'
@@ -131,10 +114,30 @@ class Collection(object):
         else:
             body, content_type = escape.json_encode(dict(obj)), 'application/json'
 
-        self.client.fetch(url, method=method,
+        self.client.fetch(
+            url,
+            method=method,
             headers={'Content-Type': content_type},
             body=body,
-            callback=on_response)
+            callback=partial(self.on_add, callback, obj))
+
+    def on_add(self, callback, obj, response):
+        if response.code >= httplib.BAD_REQUEST:
+            callback(None, errors.HTTPError(response.code))
+            return
+
+        if hasattr(obj, 'decode'):
+            resource = obj.decode(response)
+        else:
+            resource = escape.json_decode(response.body)
+
+        try:
+            obj.update(resource)
+        except Exception as error:
+            callback(None, error)
+        else:
+            obj._persisted = True
+            callback(obj, None)
 
     def _id(self, obj):
         for name, field in obj._fields.items():
