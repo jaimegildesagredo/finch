@@ -34,9 +34,15 @@ class Collection(object):
         self.request_all(callback)
 
     def request_all(self, callback):
-        self.client.fetch(self.url, callback=partial(self.on_all, callback))
+        self.client.fetch(self.url, callback=partial(self.on_query, callback))
 
-    def on_all(self, callback, response):
+    def query(self, params, callback):
+        self.request_query(callback, params)
+
+    def request_query(self, params, callback):
+        self.client.fetch(self.url, params=params, callback=partial(self.on_query, callback))
+
+    def on_query(self, callback, response):
         if response.code >= httplib.BAD_REQUEST:
             callback(None, errors.HTTPError(response.code))
             return
