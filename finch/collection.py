@@ -30,6 +30,9 @@ class Collection(object):
     def __init__(self, client):
         self.client = client
 
+    def on_error(self, callback, response):
+        callback(errors.HTTPError(response.code))
+
     def all(self, callback):
         self.request_all(callback)
 
@@ -38,7 +41,7 @@ class Collection(object):
 
     def on_all(self, callback, response):
         if response.code >= httplib.BAD_REQUEST:
-            callback(None, errors.HTTPError(response.code))
+            self.on_error(partial(callback, None), response)
             return
 
         if hasattr(self, 'decode'):
@@ -75,7 +78,7 @@ class Collection(object):
 
     def on_get(self, callback, response):
         if response.code >= httplib.BAD_REQUEST:
-            callback(None, errors.HTTPError(response.code))
+            self.on_error(partial(callback, None), response)
             return
 
         result = self.model()
@@ -138,7 +141,7 @@ class Collection(object):
 
     def on_add(self, callback, obj, response):
         if response.code >= httplib.BAD_REQUEST:
-            callback(None, errors.HTTPError(response.code))
+            self.on_error(partial(callback, None), response)
             return
 
         if hasattr(obj, 'decode'):
@@ -165,7 +168,7 @@ class Collection(object):
 
     def on_delete(self, callback, response):
         if response.code >= httplib.BAD_REQUEST:
-            callback(errors.HTTPError(response.code))
+            self.on_error(callback, response)
             return
 
         callback(None)
