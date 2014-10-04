@@ -41,3 +41,4 @@ class _HTTPRequest(object):
         self.method = options.get('method', 'GET')
         self.body = options.get('body')
         self.headers = options.get('headers')
+        self.params = options.get('params')
