@@ -27,6 +27,18 @@ class TestSession(object):
             callback=CALLBACK
         ))
 
+    def test_when_fetch_with_params_then_calls_http_client_fetch_with_params_added_to_url(self):
+        with Spy(httpclient.HTTPClient()) as http_client:
+            session = Session(http_client)
+
+        session.fetch('/users?type=json', callback=CALLBACK, params={'is_admin': 'true'})
+
+        assert_that(http_client.fetch, called().with_args(
+            has_properties(
+                url='/users?type=json&is_admin=true'
+            ),
+            callback=CALLBACK
+        ))
 
 class TestSessionWithBasicAuth(object):
     def test_when_auth_is_username_and_password_tuple_then_session_uses_basic_auth(self):

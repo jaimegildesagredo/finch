@@ -185,6 +185,30 @@ class TestGetEntireCollection(AsyncTestCase):
         ])
 
 
+class TestQueryCollection(AsyncTestCase):
+    def test_when_querying_then_client_performs_http_get_with_requested_params(self):
+        self.client.next_response = httplib.OK, self.json_collection
+
+        self.collection.query(self.stop, {'name': 'Jack'})
+        self.wait()
+
+        last_request = self.client.last_request
+
+        assert_that(last_request.params, is_({'name': 'Jack'}))
+
+    def setup(self):
+        self.client = fake_httpclient.HTTPClient()
+        self.collection = Users(self.client)
+
+        self.json_collection = escape.json_encode([
+            {
+                'id': 2,
+                'name': 'Jack',
+                'email': 'jack@example.com'
+            }
+        ])
+
+
 class TestGetModelFromCollection(AsyncTestCase):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
         self.client.next_response = httplib.OK, self.json_model
