@@ -493,7 +493,7 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
 
     def test_when_model_has_static_url_method_then_client_performs_http_request_with_returned_url(self):
         self.collection = UsersWithModelStaticUrlMethod(self.client)
-        self.user = UserWithUrl(id=1, name='Foo', email='foo@example.com')
+        self.user = self.collection.model(id=1, name='Foo', email='foo@example.com')
         self.user._persisted = True
 
         self.client.next_response = httplib.OK, self.json_model

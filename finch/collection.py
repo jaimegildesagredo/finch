@@ -102,8 +102,13 @@ class Collection(object):
             result._persisted = True
             callback(result, None)
 
-    def _url(self, id_):
-        url = getattr(self.model, '_url', self.url)
+    def _url(self, obj_or_id):
+        if isinstance(obj_or_id, self.model):
+            id_ = self._id(obj_or_id)
+            url = getattr(obj_or_id, '_url', self.url)
+        else:
+            id_ = obj_or_id
+            url = getattr(self.model, '_url', self.url)
 
         if callable(url):
             return url(id_)
@@ -134,7 +139,7 @@ class Collection(object):
 
     def request_add(self, obj, callback):
         if getattr(obj, '_persisted', False) is True:
-            url = self._url(self._id(obj))
+            url = self._url(obj)
             method = 'PUT'
         else:
             url = self.url
@@ -195,7 +200,7 @@ class Collection(object):
 
     def request_delete(self, obj, callback):
         self.client.fetch(
-            self._url(self._id(obj)),
+            self._url(obj),
             method='DELETE',
             callback=partial(self.on_delete, callback))
 
