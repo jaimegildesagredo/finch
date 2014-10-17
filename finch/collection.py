@@ -122,18 +122,6 @@ class Collection(object):
 
         return url
 
-    def _parse_url(self, url):
-        parse_url = getattr(self.model, '_parse_url', None)
-
-        if callable(parse_url):
-            return parse_url(url)
-
-        parts = url.split('/')
-        if len(parts):
-            return parts[-1]
-        else:
-            return None
-
     def add(self, obj, callback):
         self.request_add(obj, callback)
 
@@ -167,33 +155,27 @@ class Collection(object):
             self.on_error(partial(callback, None), response)
             return
 
-        if len(response.body) == 0:
-            try:
-                url = response.headers['Location']
-            except KeyError:
-                callback(obj, None)
-            id_ = self._parse_url(url)
-            if id_ is not None:
-                for name, field in obj._fields.items():
-                    if field.options.get('primary', False):
-                        setattr(obj, name, id_)
-                        callback(obj, None)
-                        return
-            callback(obj, None)
-            return
-
-        if hasattr(obj, 'decode'):
-            resource = obj.decode(response)
-        else:
-            resource = escape.json_decode(response.body)
-
         try:
-            obj.update(resource)
-        except Exception as error:
-            callback(None, error)
-        else:
+            obj._url = response.headers['Location']
+        except KeyError:
+            pass
+
+        if len(response.body) == 0:
             obj._persisted = True
             callback(obj, None)
+        else:
+            if hasattr(obj, 'decode'):
+                resource = obj.decode(response)
+            else:
+                resource = escape.json_decode(response.body)
+
+            try:
+                obj.update(resource)
+            except Exception as error:
+                callback(None, error)
+            else:
+                obj._persisted = True
+                callback(obj, None)
 
     def delete(self, obj, callback):
         self.request_delete(obj, callback)

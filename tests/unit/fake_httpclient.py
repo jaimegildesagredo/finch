@@ -32,6 +32,10 @@ class _HTTPResponse(object):
     def __init__(self, code, body, headers=None):
         self.code = code
         self.body = body
+
+        if headers is None:
+            headers = {}
+
         self.headers = headers
 
 

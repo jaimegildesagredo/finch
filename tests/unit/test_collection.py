@@ -355,6 +355,15 @@ class AddModelMixin(object):
         assert_that(not error)
         assert_that(user, has_property('_persisted', True))
 
+    def test_when_response_is_ok_and_empty_body_then_runs_callback_with_persisted_model(self):
+        self.client.next_response = httplib.CREATED, ''
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user, has_property('_persisted', True))
+
     def test_when_response_is_a_json_object_with_extra_fields_and_model_has_not_decode_method_then_runs_callback_with_value_error(self):
         self.json_model = escape.json_encode({
             'id': 1,
@@ -371,6 +380,15 @@ class AddModelMixin(object):
         assert_that(not user)
 
         assert_that(error, instance_of(booby.errors.FieldError))
+
+    def test_when_response_has_location_header_then_use_location_as_model_url(self):
+        self.client.next_response = httplib.CREATED, '', {'Location': '/users/foo'}
+
+        self.collection.add(self.user, self.stop)
+        user, error = self.wait()
+
+        assert_that(not error)
+        assert_that(user._url, equal_to('/users/foo'))
 
     def test_when_response_is_a_json_object_with_extra_fields_but_model_has_decode_method_then_runs_callback_with_model(self):
         self.collection = UsersWithModelDecode(self.client)
