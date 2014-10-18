@@ -115,10 +115,10 @@ class Collection(object):
 
         url, query = splitquery(url)
 
-        url = '{0}/{1}'.format(url, id_)
+        url = '{}/{}'.format(url, id_)
 
         if query is not None:
-            url = '{0}?{1}'.format(url, query)
+            url = '{}?{}'.format(url, query)
 
         return url
 
