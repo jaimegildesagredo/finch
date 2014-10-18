@@ -14,6 +14,11 @@ class TestHTTPError(object):
         assert_that(http_error.message, is_(httplib.responses[404]))
         assert_that(http_error.code, is_(404))
 
+    def test_when_422_then_message_is_default_message(self):
+        http_error = errors.HTTPError(422)
+
+        assert_that(http_error.message, is_('Status code 422'))
+
     def test_when_599_then_message_is_timeout(self):
         http_error = errors.HTTPError(599)
 

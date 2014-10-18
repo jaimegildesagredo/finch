@@ -23,10 +23,13 @@ class FinchError(Exception):
 
 class HTTPError(FinchError):
     def __init__(self, code):
-        if code == 599:
-            message = 'Timeout'
-        else:
+        try:
             message = httplib.responses[code]
+        except KeyError:
+            if code == 599:
+                message = 'Timeout'
+            else:
+                message = 'Status code {}'.format(code)
 
         super(HTTPError, self).__init__(message)
         self.code = code
