@@ -11,7 +11,7 @@ Highlights
 * Implemented the ``delete`` method in collections.
 * Extracted the callbacks for ``all``, ``get``, ``add`` and the new ``delete`` actions as public ``Collection`` methods so can be overridden to achieve custom behaviors.
 * Extracted public methods for the creation of requests for ``all``, ``get``, ``add`` and the new ``delete`` actions, so request creation can be overridden as well.
-* Collections can now overwrite the ``Collection`.on_error`` method to customize response error handling. See `GH-10 <https://github.com/jaimegildesagredo/finch/pull/10>`_.
+* Collections can now overwrite the ``Collection.on_error`` method to customize response error handling. See `GH-10 <https://github.com/jaimegildesagredo/finch/pull/10>`_.
 * Added the ``Collection.query`` method that works like the ``all`` method allowing to pass query string parameters. See `GH-12 <https://github.com/jaimegildesagredo/finch/pull/12>`_.
 * Now when an object is added to the collection, if the response contains a ``Location`` header, the object url will be the content of that header. See `GH-11 <https://github.com/jaimegildesagredo/finch/pull/11>`_.
 
