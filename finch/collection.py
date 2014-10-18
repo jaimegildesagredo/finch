@@ -60,7 +60,7 @@ class Collection(object):
                 The response body was expected to be a JSON array.
 
                 To properly process the response you should define a
-                `decode(raw)` method in your `Collection` class."""))
+                `decode(response)` method in your `Collection` class."""))
 
             return
 
