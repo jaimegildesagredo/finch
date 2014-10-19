@@ -7,7 +7,7 @@ env:
 install:
  - python setup.py sdist
  - pip install tornado$TORNADO_VERSION
- - pip install dist/finch-`python setup.py --version`.tar.gz
+ - pip install dist/`python setup.py --name`-`python setup.py --version`.tar.gz
  - pip install -r test-requirements.txt
 
 script:
