@@ -66,7 +66,7 @@ class TestGetEntireCollection(AsyncTestCase):
 
         assert_that(not users)
         assert_that(error, instance_of(ValueError))
-        assert_that(error.message, contains_string(
+        assert_that(str(error), contains_string(
             "The response body was expected to be a JSON array."))
 
     def test_when_response_resources_have_extra_fields_and_collection_has_not_decode_method_then_runs_callback_with_error(self):
