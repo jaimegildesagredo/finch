@@ -15,7 +15,7 @@ class TestBasicAuth(object):
         self.auth(self.request)
 
         assert_that(self.request.headers,
-            has_entry('Authorization', 'Basic cm9vdDp0b29y'))
+            has_entry('Authorization', b'Basic cm9vdDp0b29y'))
 
     def test_when_auth_with_username_then_returns_request_with_authorization_header(self):
         self.auth = HTTPBasicAuth(u'root')
@@ -23,7 +23,7 @@ class TestBasicAuth(object):
         self.auth(self.request)
 
         assert_that(self.request.headers,
-            has_entry('Authorization', 'Basic cm9vdDo='))
+            has_entry('Authorization', b'Basic cm9vdDo='))
 
     def test_when_auth_request_with_headers_then_returns_request_with_these_headers(self):
         self.request.headers = {'Content-Type': 'application/json'}
@@ -39,4 +39,4 @@ class TestBasicAuth(object):
         self.auth(self.request)
 
         assert_that(self.request.headers,
-            has_entry('Authorization', 'Basic cm9vdDp0b29y'))
+            has_entry('Authorization', b'Basic cm9vdDp0b29y'))

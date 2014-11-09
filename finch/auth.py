@@ -23,7 +23,12 @@ def _basic_auth_str(username, password=None):
     if password is not None:
         auth += '{0}'.format(password)
 
-    return 'Basic ' + base64.b64encode(auth)
+    try:
+        auth = bytes(auth, "utf-8")
+    except TypeError:  # python 2
+        pass
+
+    return b'Basic ' + base64.b64encode(auth)
 
 
 class OAuth1(object):
