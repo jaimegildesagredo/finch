@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import sys
 
 from oauthlib.oauth1 import rfc5849
 
+if sys.version > "3":
+    unicode = str
 
 class HTTPBasicAuth(object):
     def __init__(self, username, password=None):

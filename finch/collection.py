@@ -14,8 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import httplib
-from urllib import splitquery
+try:
+    from http.client import BAD_REQUEST
+except ImportError:
+    from httplib import BAD_REQUEST
+try:
+    from urllib.parse import splitquery
+except ImportError:
+    from urllib import splitquery
+
 from functools import partial
 
 import booby.inspection
@@ -46,7 +53,7 @@ class Collection(object):
         self.client.fetch(self.url, params=params, callback=partial(self.on_query, callback))
 
     def on_query(self, callback, response):
-        if response.code >= httplib.BAD_REQUEST:
+        if response.code >= BAD_REQUEST:
             self.on_error(partial(callback, None), response)
             return
 
@@ -83,7 +90,7 @@ class Collection(object):
         self.client.fetch(self._url(id_), callback=partial(self.on_get, callback))
 
     def on_get(self, callback, response):
-        if response.code >= httplib.BAD_REQUEST:
+        if response.code >= BAD_REQUEST:
             self.on_error(partial(callback, None), response)
             return
 
@@ -151,7 +158,7 @@ class Collection(object):
                 return getattr(obj, name)
 
     def on_add(self, callback, obj, response):
-        if response.code >= httplib.BAD_REQUEST:
+        if response.code >= BAD_REQUEST:
             self.on_error(partial(callback, None), response)
             return
 
@@ -187,7 +194,7 @@ class Collection(object):
             callback=partial(self.on_delete, callback))
 
     def on_delete(self, callback, response):
-        if response.code >= httplib.BAD_REQUEST:
+        if response.code >= BAD_REQUEST:
             self.on_error(callback, response)
             return
 
