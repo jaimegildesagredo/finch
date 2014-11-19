@@ -14,7 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import httplib
+try:
+    from http.client import responses
+except ImportError:
+    from httplib import responses
 
 
 class FinchError(Exception):
@@ -24,7 +27,7 @@ class FinchError(Exception):
 class HTTPError(FinchError):
     def __init__(self, code):
         try:
-            message = httplib.responses[code]
+            message = responses[code]
         except KeyError:
             if code == 599:
                 message = 'Timeout'

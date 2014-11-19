@@ -1,5 +1,11 @@
 language: python
 
+python:
+  - "2.7"
+  - "pypy"
+  - "3.3"
+  - "3.4"
+
 env:
   - TORNADO_VERSION=''
   - TORNADO_VERSION='>=3.0,<4.0'

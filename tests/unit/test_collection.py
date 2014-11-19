@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import urllib
-import httplib
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+try:
+    from http.client import OK, NOT_FOUND, CREATED, NO_CONTENT, INTERNAL_SERVER_ERROR, BAD_REQUEST
+except ImportError:
+    from httplib import OK, NOT_FOUND, CREATED, NO_CONTENT, INTERNAL_SERVER_ERROR, BAD_REQUEST
 
 import booby
 from booby import Model, fields
@@ -15,7 +21,7 @@ from finch import errors, Collection
 
 class TestGetEntireCollection(AsyncTestCase):
     def test_when_response_is_a_json_array_then_runs_callback_with_collection(self):
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -27,7 +33,7 @@ class TestGetEntireCollection(AsyncTestCase):
         ))
 
     def test_when_response_is_ok_then_runs_callback_with_persisted_objects_in_collection(self):
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -53,14 +59,14 @@ class TestGetEntireCollection(AsyncTestCase):
             ]
         })
 
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
 
         assert_that(not users)
         assert_that(error, instance_of(ValueError))
-        assert_that(error.message, contains_string(
+        assert_that(str(error), contains_string(
             "The response body was expected to be a JSON array."))
 
     def test_when_response_resources_have_extra_fields_and_collection_has_not_decode_method_then_runs_callback_with_error(self):
@@ -79,7 +85,7 @@ class TestGetEntireCollection(AsyncTestCase):
             }
         ])
 
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -106,7 +112,7 @@ class TestGetEntireCollection(AsyncTestCase):
             }
         ])
 
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -135,7 +141,7 @@ class TestGetEntireCollection(AsyncTestCase):
             ]
         })
 
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         users, error = self.wait()
@@ -147,17 +153,17 @@ class TestGetEntireCollection(AsyncTestCase):
         ))
 
     def test_when_response_is_not_found_then_runs_callback_with_http_error(self):
-        self.client.next_response = httplib.NOT_FOUND, 'Not Found'
+        self.client.next_response = NOT_FOUND, 'Not Found'
 
         self.collection.all(self.stop)
         users, error = self.wait()
 
         assert_that(not users)
         assert_that(error, instance_of(errors.HTTPError))
-        assert_that(error, has_property('code', httplib.NOT_FOUND))
+        assert_that(error, has_property('code', NOT_FOUND))
 
     def test_when_fetching_collection_then_client_performs_http_get_to_collection_url(self):
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.all(self.stop)
         self.wait()
@@ -187,7 +193,7 @@ class TestGetEntireCollection(AsyncTestCase):
 
 class TestQueryCollection(AsyncTestCase):
     def test_when_querying_then_client_performs_http_get_with_requested_params(self):
-        self.client.next_response = httplib.OK, self.json_collection
+        self.client.next_response = OK, self.json_collection
 
         self.collection.query(self.stop, {'name': 'Jack'})
         self.wait()
@@ -211,7 +217,7 @@ class TestQueryCollection(AsyncTestCase):
 
 class TestGetModelFromCollection(AsyncTestCase):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -220,7 +226,7 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_response_is_ok_then_runs_callback_with_persisted_model(self):
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -236,7 +242,7 @@ class TestGetModelFromCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -255,7 +261,7 @@ class TestGetModelFromCollection(AsyncTestCase):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
@@ -264,17 +270,17 @@ class TestGetModelFromCollection(AsyncTestCase):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_response_is_not_found_then_runs_callback_with_http_error(self):
-        self.client.next_response = httplib.NOT_FOUND, 'Not Found'
+        self.client.next_response = NOT_FOUND, 'Not Found'
 
         self.collection.get(1, self.stop)
         user, error = self.wait()
 
         assert_that(not user)
         assert_that(error, instance_of(errors.HTTPError))
-        assert_that(error, has_property('code', httplib.NOT_FOUND))
+        assert_that(error, has_property('code', NOT_FOUND))
 
     def test_when_model_has_not_url_then_client_performs_http_get_using_the_collection_url(self):
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -287,7 +293,7 @@ class TestGetModelFromCollection(AsyncTestCase):
     def test_when_model_has_url_attribute_then_client_performs_http_request_with_model_url(self):
         self.collection = UsersWithModelUrl(self.client)
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -297,7 +303,7 @@ class TestGetModelFromCollection(AsyncTestCase):
     def test_when_model_url_contains_query_params_then_client_performs_http_request_with_correct_url(self):
         self.collection = UsersWithModelUrlQuery(self.client)
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -307,7 +313,7 @@ class TestGetModelFromCollection(AsyncTestCase):
     def test_when_model_has_static_url_method_then_client_performs_http_request_with_returned_url(self):
         self.collection = UsersWithModelStaticUrlMethod(self.client)
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -317,7 +323,7 @@ class TestGetModelFromCollection(AsyncTestCase):
     def test_when_collection_url_contains_query_params_then_client_performs_http_request_with_correct_url(self):
         self.collection.url += '?type=json'
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.get(1, self.stop)
         self.wait()
@@ -337,7 +343,7 @@ class TestGetModelFromCollection(AsyncTestCase):
 
 class AddModelMixin(object):
     def test_when_response_is_a_json_object_then_runs_callback_with_model(self):
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -347,7 +353,7 @@ class AddModelMixin(object):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_response_is_ok_then_runs_callback_with_persisted_model(self):
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -356,7 +362,7 @@ class AddModelMixin(object):
         assert_that(user, has_property('_persisted', True))
 
     def test_when_response_is_ok_and_empty_body_then_runs_callback_with_persisted_model(self):
-        self.client.next_response = httplib.CREATED, ''
+        self.client.next_response = CREATED, ''
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -372,7 +378,7 @@ class AddModelMixin(object):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -382,7 +388,7 @@ class AddModelMixin(object):
         assert_that(error, instance_of(booby.errors.FieldError))
 
     def test_when_response_has_location_header_then_use_location_as_model_url(self):
-        self.client.next_response = httplib.CREATED, '', {'Location': '/users/foo'}
+        self.client.next_response = CREATED, '', {'Location': '/users/foo'}
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -401,7 +407,7 @@ class AddModelMixin(object):
             'url': 'http://example.com/Foo'
         })
 
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
@@ -410,17 +416,17 @@ class AddModelMixin(object):
         assert_that(user, has_properties(id=1, name=u'Foo', email=u'foo@example.com'))
 
     def test_when_response_is_bad_request_then_runs_callback_with_http_error(self):
-        self.client.next_response = httplib.BAD_REQUEST, 'Bad Request'
+        self.client.next_response = BAD_REQUEST, 'Bad Request'
 
         self.collection.add(self.user, self.stop)
         user, error = self.wait()
 
         assert_that(not user)
         assert_that(error, instance_of(errors.HTTPError))
-        assert_that(error, has_property('code', httplib.BAD_REQUEST))
+        assert_that(error, has_property('code', BAD_REQUEST))
 
     def test_when_model_has_not_encode_method_then_client_performs_http_request_with_json_body(self):
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         expected_body = escape.json_encode(dict(self.user))
 
@@ -433,11 +439,11 @@ class AddModelMixin(object):
         assert_that(last_request.headers, has_entry('Content-Type', 'application/json'))
 
     def test_when_model_has_encode_method_then_client_performs_http_request_with_custom_body_and_content_type(self):
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.user = UserWithEncode(name='Foo', email='foo@example.com')
 
-        expected_body = urllib.urlencode(dict(self.user))
+        expected_body = urlencode(dict(self.user))
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -450,7 +456,7 @@ class AddModelMixin(object):
 
 class TestAddNewModelToCollection(AddModelMixin, AsyncTestCase):
     def test_when_creating_model_then_client_performs_http_post_to_collection_url(self):
-        self.client.next_response = httplib.CREATED, self.json_model
+        self.client.next_response = CREATED, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -475,7 +481,7 @@ class TestAddNewModelToCollection(AddModelMixin, AsyncTestCase):
 
 class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
     def test_when_model_has_not_url_then_client_performs_http_put_to_collection_url(self):
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -490,7 +496,7 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
         self.user = UserWithUrl(id=1, name='Foo', email='foo@example.com')
         self.user._persisted = True
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -502,7 +508,7 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
         self.user = UserWithUrlQuery(id=1, name='Foo', email='foo@example.com')
         self.user._persisted = True
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -514,7 +520,7 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
         self.user = self.collection.model(id=1, name='Foo', email='foo@example.com')
         self.user._persisted = True
 
-        self.client.next_response = httplib.OK, self.json_model
+        self.client.next_response = OK, self.json_model
 
         self.collection.add(self.user, self.stop)
         self.wait()
@@ -537,7 +543,7 @@ class TestAddPersistedModelToCollection(AddModelMixin, AsyncTestCase):
 
 class TestDelete(AsyncTestCase):
     def test_should_perform_http_delete_to_resource_url(self):
-        self.client.next_response = httplib.NO_CONTENT, ''
+        self.client.next_response = NO_CONTENT, ''
 
         self.collection.delete(self.user, self.stop)
         self.wait()
@@ -548,7 +554,7 @@ class TestDelete(AsyncTestCase):
         assert_that(last_request.method, is_('DELETE'))
 
     def test_should_run_callback_with_error_if_failed_to_perform_delete(self):
-        self.client.next_response = httplib.INTERNAL_SERVER_ERROR, 'Internal Server Error'
+        self.client.next_response = INTERNAL_SERVER_ERROR, 'Internal Server Error'
 
         self.collection.delete(self.user, self.stop)
         error = self.wait()[0]
@@ -556,7 +562,7 @@ class TestDelete(AsyncTestCase):
         assert_that(error, instance_of(errors.HTTPError))
 
     def test_should_run_callback_with_none_if_sucessfuly_deleted(self):
-        self.client.next_response = httplib.NO_CONTENT, ''
+        self.client.next_response = NO_CONTENT, ''
 
         self.collection.delete(self.user, self.stop)
         error = self.wait()[0]
@@ -599,12 +605,12 @@ class UserWithUrlQuery(User):
 class UserWithStaticUrlMethod(User):
     @staticmethod
     def _url(id_):
-        return '/users?' + urllib.urlencode({'id': id_})
+        return '/users?' + urlencode({'id': id_})
 
 
 class UserWithEncode(User):
     def encode(self):
-        return urllib.urlencode(dict(self)), 'application/x-www-form-urlencoded'
+        return urlencode(dict(self)), 'application/x-www-form-urlencoded'
 
 
 class UserWithoutPrimary(User):

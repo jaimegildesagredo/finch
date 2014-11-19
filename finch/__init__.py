@@ -16,8 +16,8 @@
 
 from booby import Model, fields
 
-from session import Session
-from collection import Collection
+from finch.session import Session
+from finch.collection import Collection
 
 __all__ = [
     'Session',
