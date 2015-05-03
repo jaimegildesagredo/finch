@@ -16,6 +16,11 @@
 
 """This module is a wrapper on top of the Tornado's HTTPClient."""
 
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
 from tornado import httpclient
 from tornado import httputil
 
@@ -23,8 +28,9 @@ from finch.auth import HTTPBasicAuth
 
 
 class Session(object):
-    def __init__(self, http_client, auth=None):
+    def __init__(self, http_client, base_url=None, auth=None):
         self.http_client = http_client
+        self.base_url = base_url
 
         if isinstance(auth, tuple):
             self.auth = HTTPBasicAuth(*auth)
@@ -32,6 +38,8 @@ class Session(object):
             self.auth = auth
 
     def fetch(self, url, callback, params=None, **kwargs):
+        if self.base_url is not None:
+            url = urljoin(self.base_url, url)
         if params is not None:
             url = httputil.url_concat(url, params)
 
